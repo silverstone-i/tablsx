@@ -1,0 +1,46 @@
+// Copyright © 2026 – present NapSoft LLC. All rights reserved.
+import { createWorkbook } from "../model/workbook.js";
+import { SheetBuilder } from "./sheet-builder.js";
+
+/**
+ * Builder for constructing Workbook objects with a fluent API.
+ * Wraps the internal data model — produces the same plain objects
+ * used by the reader and writer.
+ */
+export class WorkbookBuilder {
+  /** @type {Map<string, SheetBuilder>} */
+  #sheets = new Map();
+
+  /**
+   * Create a new WorkbookBuilder.
+   * @returns {WorkbookBuilder}
+   */
+  static create() {
+    return new WorkbookBuilder();
+  }
+
+  /**
+   * Get or create a SheetBuilder for the given sheet name.
+   * If a sheet with this name already exists, the existing builder is returned.
+   * @param {string} name
+   * @returns {SheetBuilder}
+   */
+  sheet(name) {
+    if (!this.#sheets.has(name)) {
+      this.#sheets.set(name, new SheetBuilder(name));
+    }
+    return this.#sheets.get(name);
+  }
+
+  /**
+   * Build the Workbook object from all sheets.
+   * @returns {{ sheets: Array<{ name: string, rows: Array<Array<object>> }> }}
+   */
+  build() {
+    const sheets = [];
+    for (const builder of this.#sheets.values()) {
+      sheets.push(builder.build());
+    }
+    return createWorkbook(sheets);
+  }
+}
