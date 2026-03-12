@@ -38,3 +38,8 @@ A husky pre-commit hook runs automatically on every commit:
 - **Never add `Co-Authored-By` lines** to commit messages — suppress the default trailer entirely
 - Keep commit messages concise (1-2 sentences) focused on "why" not "what"
 - Stage specific files, avoid `git add -A`
+
+## Branching / PR Strategy
+- All feature and fix branches create PRs targeting **`dev`**
+- PRs from `dev` merge into **`main`** (production)
+- Never create PRs directly from feature branches to `main`
