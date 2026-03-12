@@ -21,3 +21,4 @@ export {
   deserializeVector,
   isVectorString,
 } from "./utils/vectors.js";
+export { sheetFromRows, rowsFromSheet, inferSchema } from "./tabular/index.js";
