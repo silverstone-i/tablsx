@@ -19,7 +19,7 @@ Status: Draft
 8. [Phase 1 — Core XLSX Engine (MVP)](#8-phase-1--core-xlsx-engine-mvp)
 9. [Phase 2 — Full Data Type Support](#9-phase-2--full-data-type-support)
 10. [Phase 3 — Tabular Data Interchange](#10-phase-3--tabular-data-interchange)
-11. [Phase 4 — Public Authoring Convenience Layer](#11-phase-4--public-authoring-convenience-layer)
+11. [Phase 4 — Public Convenience Layer](#11-phase-4--public-convenience-layer)
 12. [Documentation Requirements](#12-documentation-requirements)
 13. [Testing Strategy](#13-testing-strategy)
 14. [Performance Considerations](#14-performance-considerations)
@@ -282,6 +282,8 @@ src/
     worksheet-parser.js     # Parse xl/worksheets/sheetN.xml
     shared-strings.js       # Parse xl/sharedStrings.xml
     styles-parser.js        # Parse xl/styles.xml (for date detection)
+    workbook-reader.js      # WorkbookReader convenience class
+    sheet-reader.js         # SheetReader convenience class
   writer/
     index.js                # writeXlsx() entry point
     zip.js                  # ZIP packaging
@@ -530,11 +532,11 @@ const schema = inferSchema(sheet)
 
 ---
 
-## 11. Phase 4 — Public Authoring Convenience Layer
+## 11. Phase 4 — Public Convenience Layer
 
 ### Goal
 
-Provide a developer-friendly builder API for constructing workbooks programmatically. The builder wraps the internal data model — it does not replace it.
+Provide developer-friendly convenience classes for constructing and reading workbooks programmatically. These classes wrap the internal data model — they do not replace it.
 
 ### Scope
 
@@ -601,9 +603,47 @@ sheet.addObjects(data)
 // Each object's values are matched to headers by key name
 ```
 
+**WorkbookReader**
+
+```js
+class WorkbookReader {
+  static fromBuffer(buffer: Buffer|Uint8Array)  // → WorkbookReader (parse .xlsx)
+  static fromWorkbook(workbook: Workbook)       // → WorkbookReader (wrap existing)
+  get sheetNames: string[]                      // Sheet names in order
+  get sheetCount: number                        // Number of sheets
+  sheet(nameOrIndex: string|number)             // → SheetReader
+}
+```
+
+**SheetReader**
+
+```js
+class SheetReader {
+  get name: string                              // Sheet name
+  get rows: Cell[][]                            // Raw cell grid
+  get rowCount: number                          // Number of rows
+  get columnCount: number                       // Number of columns
+  getRow(index: number)                         // → Cell[] (single row)
+  getCell(row: number, col: number)             // → Cell (single cell)
+  toValues()                                    // → any[][] (strip Cell metadata)
+  toObjects(options?: { headers?: string[] })   // → object[] (first row as keys)
+}
+```
+
+**Integration with read**
+
+```js
+import { WorkbookReader } from 'tablsx'
+
+const reader = WorkbookReader.fromBuffer(buffer)
+console.log(reader.sheetNames)                    // ['Sheet1', 'Sheet2']
+const sheet = reader.sheet('Sheet1')
+const rows = sheet.toObjects()                    // [{ Name: 'Alice', Age: 30 }, ...]
+```
+
 ### Design Constraint
 
-The builder must always produce the same internal `Workbook`/`Worksheet`/`Cell` structures used by the reader and writer. It is a convenience layer, not an alternative data path.
+The builder and reader convenience classes must always operate on the same internal `Workbook`/`Worksheet`/`Cell` structures used by `readXlsx` and `writeXlsx`. They are convenience layers, not alternative data paths.
 
 ### Acceptance Criteria
 
@@ -611,6 +651,9 @@ The builder must always produce the same internal `Workbook`/`Worksheet`/`Cell` 
 - `addObjects` correctly maps object keys to column headers
 - Type inference matches the same rules used in `sheetFromRows`
 - `wb.build()` returns a standard `Workbook` object compatible with `writeXlsx`
+- `WorkbookReader.fromBuffer` produces the same data as `readXlsx`
+- `SheetReader.toObjects()` round-trips with `SheetBuilder.addObjects()`
+- `SheetReader.toValues()` returns a plain 2D array of cell values
 
 ---
 
@@ -633,7 +676,7 @@ docs/adr/
   0005-vector-serialization-format.md
   0006-formula-handling.md
   0007-schema-inference-algorithm.md
-  0008-builder-api.md
+  0008-builder-api.md          # Also covers WorkbookReader/SheetReader
 ```
 
 **ADR Template:**
@@ -668,7 +711,7 @@ What becomes easier or more difficult as a result of this decision?
 | ADR-0005 | 2 | Vector serialization: JSON string vs delimited format |
 | ADR-0006 | 2 | Formula handling: store-only approach |
 | ADR-0007 | 3 | Schema inference algorithm |
-| ADR-0008 | 4 | Builder API: builder pattern vs fluent interface |
+| ADR-0008 | 4 | Convenience API: builder and reader wrapper classes |
 
 ### Rules Documentation
 
@@ -771,6 +814,15 @@ docs/rules/
 - Vector column round-trip through JSON serialization
 - Missing/null value handling
 - Objects with inconsistent keys
+
+**Convenience API Tests**
+
+- `WorkbookReader.fromBuffer` creates readers from `.xlsx` buffers
+- `WorkbookReader.fromWorkbook` wraps an existing Workbook
+- `SheetReader.toObjects()` round-trips with `SheetBuilder.addObjects()`
+- `SheetReader.toValues()` returns plain 2D value arrays
+- Sheet access by name and by index, with error handling for out-of-bounds
+- Cell-level access via `getRow()` and `getCell()`
 
 **Large Dataset Tests**
 
@@ -947,6 +999,34 @@ embeddings.addObjects([
 ])
 
 const buffer = writeXlsx(wb.build())
+```
+
+### Reader Convenience API (Phase 4)
+
+```js
+import { WorkbookReader } from 'tablsx'
+import { readFile } from 'node:fs/promises'
+
+const buffer = await readFile('input.xlsx')
+const reader = WorkbookReader.fromBuffer(buffer)
+
+// Explore structure
+console.log(reader.sheetNames)          // ['Employees', 'Embeddings']
+console.log(reader.sheetCount)          // 2
+
+// Access by name or index
+const sheet = reader.sheet('Employees')
+console.log(sheet.rowCount)             // 4
+console.log(sheet.columnCount)          // 4
+
+// Quick value extraction
+const values = sheet.toValues()         // [['Name', 'Age', ...], ['Alice', 30, ...], ...]
+
+// Object conversion (first row as headers)
+const rows = sheet.toObjects()          // [{ Name: 'Alice', Age: 30, ... }, ...]
+
+// Cell-level access
+const cell = sheet.getCell(1, 0)        // { value: 'Alice', formula: null, type: 'string' }
 ```
 
 ---

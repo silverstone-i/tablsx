@@ -2,7 +2,7 @@
 
 Defines the rules for first-row-as-headers behavior in the tabular data layer.
 
-> **Note**: Header detection is primarily a tabular data interchange concern. This document describes the conventions that apply to `sheetFromRows()`, `rowsFromSheet()`, and `SheetBuilder.addObjects()`.
+> **Note**: Header detection is primarily a tabular data interchange concern. This document describes the conventions that apply to `sheetFromRows()`, `rowsFromSheet()`, `SheetBuilder.addObjects()`, and `SheetReader.toObjects()`.
 
 ## Default Behavior
 
@@ -18,6 +18,7 @@ Defines the rules for first-row-as-headers behavior in the tabular data layer.
 | `rowsFromSheet(sheet)` | First row cell values |
 | `SheetBuilder.addObjects(objects)` | Union of keys from all provided objects (Phase 4) |
 | `SheetBuilder.setHeaders(headers)` | Explicitly provided array (Phase 4) |
+| `SheetReader.toObjects()` | First row cell values (converted to strings), or explicit `headers` option (Phase 4) |
 
 ## Duplicate Header Names
 
