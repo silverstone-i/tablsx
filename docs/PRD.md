@@ -82,7 +82,7 @@ The following are explicitly out of scope for all phases:
 |---|---|
 | Language | JavaScript (Node.js) |
 | Runtime | Node.js 18+ |
-| Module system | ESM (with CJS compatibility) |
+| Module system | ESM only |
 | Excel format | `.xlsx` (Open XML SpreadsheetML, ECMA-376) |
 | Test framework | Node.js built-in test runner (`node:test`) or vitest |
 
