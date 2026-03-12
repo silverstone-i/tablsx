@@ -6,44 +6,45 @@ import {
   createWorkbook,
   normalizeRows,
 } from "../../src/model/workbook.js";
+import { CellType } from "../../src/model/types.js";
 
 describe("createCell", () => {
   it("creates an empty cell by default", () => {
     const cell = createCell();
-    expect(cell).toEqual({ value: null, formula: null, type: "empty" });
+    expect(cell).toEqual({ value: null, formula: null, type: CellType.EMPTY });
   });
 
   it("infers string type", () => {
     const cell = createCell("hello");
-    expect(cell.type).toBe("string");
+    expect(cell.type).toBe(CellType.STRING);
     expect(cell.value).toBe("hello");
   });
 
   it("infers number type", () => {
     const cell = createCell(42);
-    expect(cell.type).toBe("number");
+    expect(cell.type).toBe(CellType.NUMBER);
   });
 
   it("infers boolean type", () => {
     const cell = createCell(true);
-    expect(cell.type).toBe("boolean");
+    expect(cell.type).toBe(CellType.BOOLEAN);
   });
 
   it("infers date type", () => {
     const cell = createCell(new Date("2024-01-01"));
-    expect(cell.type).toBe("date");
+    expect(cell.type).toBe(CellType.DATE);
   });
 
   it("creates a formula cell", () => {
     const cell = createCell(42, "SUM(A1:A10)");
-    expect(cell.type).toBe("formula");
+    expect(cell.type).toBe(CellType.FORMULA);
     expect(cell.formula).toBe("SUM(A1:A10)");
     expect(cell.value).toBe(42);
   });
 
   it("accepts explicit type override", () => {
-    const cell = createCell(42, null, "number");
-    expect(cell.type).toBe("number");
+    const cell = createCell(42, null, CellType.NUMBER);
+    expect(cell.type).toBe(CellType.NUMBER);
   });
 });
 
@@ -77,8 +78,8 @@ describe("normalizeRows", () => {
     const normalized = normalizeRows(rows);
     expect(normalized[0].length).toBe(3);
     expect(normalized[1].length).toBe(3);
-    expect(normalized[1][1].type).toBe("empty");
-    expect(normalized[1][2].type).toBe("empty");
+    expect(normalized[1][1].type).toBe(CellType.EMPTY);
+    expect(normalized[1][2].type).toBe(CellType.EMPTY);
   });
 
   it("handles empty rows array", () => {

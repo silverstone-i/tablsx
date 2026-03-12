@@ -14,7 +14,7 @@ The following cell types are preserved exactly through a full cycle:
 | `DATE` | Year, month, day, hour, minute, second preserved (milliseconds may have sub-ms rounding from serial conversion) |
 | `EMPTY` | Empty cells remain empty |
 | `FORMULA` | Formula string and cached value both preserved |
-| `VECTOR` | `number[]` round-trips through JSON string intermediate without precision loss |
+| `VECTOR` | Written as JSON string via shared strings; read back as `STRING` in Phase 1 (reader does not yet deserialize vectors) |
 
 ## Cell Structure Preservation
 

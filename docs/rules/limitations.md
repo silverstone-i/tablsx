@@ -54,7 +54,7 @@ The following Excel features are explicitly out of scope and will not be support
 ## Inline Strings
 
 - Inline strings (`<c t="inlineStr"><is><t>text</t></is></c>`) are supported on read
-- On write, all strings go through the shared strings table — inline strings are not generated
+- On write, strings are written via the shared strings table whenever possible, but in some edge cases (for example, explicit `STRING` cells with null values or missing shared string entries) the writer may emit inline strings (`t="inlineStr"`) as a fallback
 
 ## Date Limitations
 

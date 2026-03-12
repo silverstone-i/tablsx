@@ -11,4 +11,4 @@ Key capabilities:
 - Support vector/embedding columns using numeric arrays
 - Provide a simple core data model with an optional builder-style API for creating workbooks
 
-tablsx is designed for data pipelines, database expor
+tablsx is designed for data pipelines, database exports, and other data engineering workflows.

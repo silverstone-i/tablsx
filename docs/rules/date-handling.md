@@ -83,5 +83,5 @@ If `xl/styles.xml` is absent or a cell has no style index, numeric values are tr
 
 When writing a `DATE` cell:
 - The `Date` value is converted to an Excel serial number via `jsDateToExcel()`
-- The cell is written with style index `s="1"`, which references a default `yyyy-mm-dd` format defined in the generated `xl/styles.xml`
+- The cell is written with style index `s="1"`, which references the built-in date format with `numFmtId=14` (`m/d/yyyy`) in the generated `xl/styles.xml`
 - No type attribute is set on the `<c>` element (dates are stored as numbers in Excel)

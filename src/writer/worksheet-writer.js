@@ -60,6 +60,10 @@ export function generateWorksheetXml(sheet, sharedStringsMap) {
         const idx = sharedStringsMap.get(str);
         if (idx !== undefined) {
           parts.push(`<c r="${ref}" t="s"><v>${idx}</v></c>`);
+        } else {
+          parts.push(
+            `<c r="${ref}" t="inlineStr"><is><t>${escapeXml(str)}</t></is></c>`,
+          );
         }
       } else if (cell.type === CellType.FORMULA) {
         let cellXml = `<c r="${ref}"`;
