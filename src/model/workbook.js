@@ -35,6 +35,13 @@ export function createWorksheet(name, rows = []) {
  * @returns {{ sheets: Array<object> }}
  */
 export function createWorkbook(sheets = []) {
+  const names = new Set();
+  for (const sheet of sheets) {
+    if (names.has(sheet.name)) {
+      throw new Error(`Duplicate sheet name: "${sheet.name}"`);
+    }
+    names.add(sheet.name);
+  }
   return { sheets };
 }
 

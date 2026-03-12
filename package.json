@@ -3,12 +3,16 @@
   "version": "0.1.0",
   "description": "A Node.js library for reading and writing Excel .xlsx files",
   "type": "module",
-  "main": "./src/index.js",
+  "main": "./src/index.cjs",
   "exports": {
-    ".": "./src/index.js"
+    ".": {
+      "import": "./src/index.js",
+      "require": "./src/index.cjs"
+    }
   },
   "scripts": {
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "lint": "eslint src/ test/",
     "lint:fix": "eslint src/ test/ --fix",
@@ -32,6 +36,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@vitest/coverage-v8": "^3.2.4",
     "eslint": "^10.0.3",
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.1.7",

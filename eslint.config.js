@@ -18,6 +18,16 @@ export default [
     },
   },
   {
+    files: ["**/*.cjs"],
+    languageOptions: {
+      sourceType: "commonjs",
+      globals: {
+        module: "readonly",
+        require: "readonly",
+      },
+    },
+  },
+  {
     ignores: ["node_modules/", "coverage/"],
   },
 ];

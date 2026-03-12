@@ -288,4 +288,143 @@ describe("round-trip", () => {
     expect(result.sheets[0].rows[0][1].type).toBe(CellType.STRING);
     expect(result.sheets[0].rows[0][1].value).toBe("[0,-1,10000000000]");
   });
+
+  it("round-trips date+time values preserving hours/minutes/seconds", () => {
+    const d = new Date("2024-06-15T14:30:45Z");
+    const wb = createWorkbook([createWorksheet("DateTime", [[createCell(d)]])]);
+
+    const buffer = writeXlsx(wb);
+    const result = readXlsx(buffer);
+
+    expect(result.sheets[0].rows[0][0].type).toBe(CellType.DATE);
+    const rt = result.sheets[0].rows[0][0].value;
+    expect(rt.getUTCFullYear()).toBe(2024);
+    expect(rt.getUTCMonth()).toBe(5);
+    expect(rt.getUTCDate()).toBe(15);
+    expect(rt.getUTCHours()).toBe(14);
+    expect(rt.getUTCMinutes()).toBe(30);
+    expect(rt.getUTCSeconds()).toBe(45);
+  });
+
+  it("round-trips dates near the 1900 leap year bug boundary", () => {
+    // 1900-02-28 is the last date before the phantom leap day
+    const d1 = new Date(Date.UTC(1900, 1, 28));
+    // 1900-03-01 is the first date after the phantom leap day
+    const d2 = new Date(Date.UTC(1900, 2, 1));
+    const wb = createWorkbook([
+      createWorksheet("1900Bug", [[createCell(d1), createCell(d2)]]),
+    ]);
+
+    const buffer = writeXlsx(wb);
+    const result = readXlsx(buffer);
+
+    expect(result.sheets[0].rows[0][0].type).toBe(CellType.DATE);
+    expect(result.sheets[0].rows[0][0].value.toISOString()).toBe(
+      "1900-02-28T00:00:00.000Z",
+    );
+    expect(result.sheets[0].rows[0][1].type).toBe(CellType.DATE);
+    expect(result.sheets[0].rows[0][1].value.toISOString()).toBe(
+      "1900-03-01T00:00:00.000Z",
+    );
+  });
+
+  it("round-trips epoch boundary dates", () => {
+    const d1 = new Date(Date.UTC(1900, 0, 1)); // Excel epoch start
+    const d2 = new Date(Date.UTC(2099, 11, 31)); // Far future
+    const wb = createWorkbook([
+      createWorksheet("Epochs", [[createCell(d1), createCell(d2)]]),
+    ]);
+
+    const buffer = writeXlsx(wb);
+    const result = readXlsx(buffer);
+
+    expect(result.sheets[0].rows[0][0].value.toISOString()).toBe(
+      "1900-01-01T00:00:00.000Z",
+    );
+    expect(result.sheets[0].rows[0][1].value.toISOString()).toBe(
+      "2099-12-31T00:00:00.000Z",
+    );
+  });
+
+  it("round-trips all supported types in a single row", () => {
+    const date = new Date("2024-03-15T00:00:00Z");
+    const wb = createWorkbook([
+      createWorksheet("AllTypes", [
+        [
+          createCell("text"),
+          createCell(42),
+          createCell(true),
+          createCell(date),
+          createCell(100, "SUM(A1:A10)"),
+          createCell(null, null, CellType.EMPTY),
+          createCell([1.1, 2.2, 3.3]),
+        ],
+      ]),
+    ]);
+
+    const buffer = writeXlsx(wb);
+    const result = readXlsx(buffer);
+
+    const row = result.sheets[0].rows[0];
+    expect(row[0].type).toBe(CellType.STRING);
+    expect(row[0].value).toBe("text");
+    expect(row[1].type).toBe(CellType.NUMBER);
+    expect(row[1].value).toBe(42);
+    expect(row[2].type).toBe(CellType.BOOLEAN);
+    expect(row[2].value).toBe(true);
+    expect(row[3].type).toBe(CellType.DATE);
+    expect(row[3].value.toISOString()).toBe("2024-03-15T00:00:00.000Z");
+    expect(row[4].type).toBe(CellType.FORMULA);
+    expect(row[4].formula).toBe("SUM(A1:A10)");
+    expect(row[4].value).toBe(100);
+    expect(row[5].type).toBe(CellType.EMPTY);
+    expect(row[6].type).toBe(CellType.STRING); // vectors read as STRING
+    expect(row[6].value).toBe("[1.1,2.2,3.3]");
+  });
+
+  it("round-trips numeric precision edge cases", () => {
+    const wb = createWorkbook([
+      createWorksheet("Precision", [
+        [
+          createCell(Number.MAX_SAFE_INTEGER),
+          createCell(0.1 + 0.2), // IEEE 754 classic
+          createCell(1e-15),
+          createCell(-0),
+        ],
+      ]),
+    ]);
+
+    const buffer = writeXlsx(wb);
+    const result = readXlsx(buffer);
+
+    expect(result.sheets[0].rows[0][0].value).toBe(Number.MAX_SAFE_INTEGER);
+    expect(result.sheets[0].rows[0][1].value).toBe(0.1 + 0.2);
+    expect(result.sheets[0].rows[0][2].value).toBe(1e-15);
+    expect(result.sheets[0].rows[0][3].type).toBe(CellType.NUMBER);
+  });
+
+  it("round-trips vector precision through JSON serialization", () => {
+    const vec = [0.123456789012345, -1e-10, 3.141592653589793];
+    const wb = createWorkbook([
+      createWorksheet("VecPrecision", [[createCell(vec)]]),
+    ]);
+
+    const buffer = writeXlsx(wb);
+    const result = readXlsx(buffer);
+
+    // Vectors round-trip as JSON strings, so parse back to verify precision
+    const parsed = JSON.parse(result.sheets[0].rows[0][0].value);
+    expect(parsed).toEqual(vec);
+  });
+
+  it("round-trips formula with null cached value", () => {
+    const cell = createCell(null, "NOW()", CellType.FORMULA);
+    const wb = createWorkbook([createWorksheet("F", [[cell]])]);
+
+    const buffer = writeXlsx(wb);
+    const result = readXlsx(buffer);
+
+    expect(result.sheets[0].rows[0][0].type).toBe(CellType.FORMULA);
+    expect(result.sheets[0].rows[0][0].formula).toBe("NOW()");
+  });
 });
