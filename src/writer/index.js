@@ -10,7 +10,7 @@ import {
 } from "./workbook-writer.js";
 import { generateContentTypes } from "./content-types.js";
 import { generateStylesXml } from "./styles-writer.js";
-import { normalizeRows } from "../model/workbook.js";
+import { normalizeRows, validateSheetNames } from "../model/workbook.js";
 import { createZip } from "./zip.js";
 
 /**
@@ -19,6 +19,8 @@ import { createZip } from "./zip.js";
  * @returns {Uint8Array}
  */
 export function writeXlsx(workbook) {
+  validateSheetNames(workbook.sheets);
+
   // Enforce row-length consistency before writing
   const normalizedWorkbook = {
     sheets: workbook.sheets.map((sheet) => ({

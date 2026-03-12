@@ -9,7 +9,10 @@ import {
   CellType,
 } from "../../src/index.js";
 
-describe("performance", () => {
+/* global process */
+const RUN_PERF = process.env.RUN_PERF_TESTS === "1";
+
+describe.skipIf(!RUN_PERF)("performance", () => {
   it("handles 100k rows x 20 columns with mixed types", () => {
     const ROW_COUNT = 100_000;
     const COL_COUNT = 20;

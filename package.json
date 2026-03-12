@@ -3,12 +3,9 @@
   "version": "0.1.0",
   "description": "A Node.js library for reading and writing Excel .xlsx files",
   "type": "module",
-  "main": "./src/index.cjs",
+  "main": "./src/index.js",
   "exports": {
-    ".": {
-      "import": "./src/index.js",
-      "require": "./src/index.cjs"
-    }
+    ".": "./src/index.js"
   },
   "scripts": {
     "test": "vitest run",
