@@ -14,21 +14,21 @@ Defines the rules for first-row-as-headers behavior in the tabular data layer.
 
 | Operation | Header source |
 |---|---|
-| `sheetFromRows(objects)` | Keys of the first object |
+| `sheetFromRows(objects)` | Union of keys from all objects |
 | `rowsFromSheet(sheet)` | First row cell values |
 | `SheetBuilder.addObjects(objects)` | Keys of the first object (Phase 4) |
 | `SheetBuilder.setHeaders(headers)` | Explicitly provided array (Phase 4) |
 
 ## Duplicate Header Names
 
-- Duplicate header names are not automatically deduplicated
-- When converting to objects, later columns with duplicate names overwrite earlier ones
-- Callers are responsible for ensuring unique header names if property uniqueness matters
+- Duplicate header names in `rowsFromSheet()` are automatically disambiguated by appending `_2`, `_3`, etc. (e.g., `["id", "id", "id"]` becomes `["id", "id_2", "id_3"]`)
+- This prevents silent data loss when converting to objects, where later columns would otherwise overwrite earlier ones
+- The original header text is preserved for the first occurrence; only subsequent duplicates receive a suffix
 
 ## Empty Header Cells
 
-- Empty cells in the header row produce `null` or empty string keys
-- When converting to objects, these become properties with `null`/empty-string keys
+- Empty or null cells in the header row produce empty string (`""`) keys — they do not become the literal string `"null"`
+- When converting to objects, these become properties with empty-string keys
 - Callers should handle or pre-filter empty headers as needed
 
 ## Header Normalization

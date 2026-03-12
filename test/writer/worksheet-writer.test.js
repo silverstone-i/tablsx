@@ -147,4 +147,26 @@ describe("generateWorksheetXml", () => {
       "Unsupported cell type",
     );
   });
+
+  it("adds xml:space='preserve' for inline strings with leading/trailing whitespace", () => {
+    const sheet = { rows: [[createCell(" padded ")]] };
+    const xml = generateWorksheetXml(sheet, new Map());
+    expect(xml).toContain('xml:space="preserve"');
+    expect(xml).toContain(" padded ");
+  });
+
+  it("omits xml:space for inline strings without surrounding whitespace", () => {
+    const sheet = { rows: [[createCell("no-pad")]] };
+    const xml = generateWorksheetXml(sheet, new Map());
+    expect(xml).toContain('t="inlineStr"');
+    expect(xml).not.toContain("xml:space");
+  });
+
+  it("throws for DATE cells with non-finite serial", () => {
+    const cell = createCell("not-a-date", null, CellType.DATE);
+    const sheet = { rows: [[cell]] };
+    expect(() => generateWorksheetXml(sheet, new Map())).toThrow(
+      "non-finite serial",
+    );
+  });
 });

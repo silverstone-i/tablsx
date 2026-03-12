@@ -140,7 +140,9 @@ All Excel-specific parsing and generation logic (shared strings, cell type resol
         xl/_rels/workbook.xml.rels
         xl/worksheets/sheet1.xml ... sheetN.xml
         xl/sharedStrings.xml
+        xl/styles.xml (for date detection)
     → Parse shared strings table
+    → Parse styles for date-formatted cell indices
     → For each worksheet XML:
         → Parse cell elements
         → Resolve shared string references
@@ -492,7 +494,7 @@ const rows = rowsFromSheet(sheet, {
 
 **Row Serialization**
 
-- Objects are serialized to cell arrays based on column order derived from the first object's keys (or an explicit column list)
+- Objects are serialized to cell arrays based on the union of keys from all row objects, preserving insertion order (first-seen order across all rows)
 - Handles `undefined` and missing properties as empty cells
 - Handles nested values by JSON-stringifying them
 

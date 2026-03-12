@@ -18,6 +18,16 @@ describe("serializeVector", () => {
   it("handles empty arrays", () => {
     expect(serializeVector([])).toBe("[]");
   });
+
+  it("throws on NaN or Infinity values", () => {
+    expect(() => serializeVector([NaN, 1])).toThrow("finite numbers");
+    expect(() => serializeVector([Infinity])).toThrow("finite numbers");
+    expect(() => serializeVector([-Infinity])).toThrow("finite numbers");
+  });
+
+  it("throws on non-array input", () => {
+    expect(() => serializeVector("not an array")).toThrow("finite numbers");
+  });
 });
 
 describe("deserializeVector", () => {
