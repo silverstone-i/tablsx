@@ -78,13 +78,21 @@ export function generateWorksheetXml(sheet, sharedStringsMap) {
         let cellXml = `<c r="${ref}"`;
         if (typeof cell.value === "string") {
           cellXml += ' t="str"';
+        } else if (typeof cell.value === "boolean") {
+          cellXml += ' t="b"';
         }
         cellXml += ">";
         if (cell.formula) {
           cellXml += `<f>${escapeXml(cell.formula)}</f>`;
         }
         if (cell.value !== null && cell.value !== undefined) {
-          cellXml += `<v>${escapeXml(String(cell.value))}</v>`;
+          const cachedValue =
+            typeof cell.value === "boolean"
+              ? cell.value
+                ? "1"
+                : "0"
+              : escapeXml(String(cell.value));
+          cellXml += `<v>${cachedValue}</v>`;
         }
         cellXml += "</c>";
         parts.push(cellXml);

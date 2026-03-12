@@ -71,6 +71,11 @@ export class SheetBuilder {
     if (objects.length === 0) return this;
 
     if (!this.#headers) {
+      if (this.#rows.length > 0) {
+        throw new Error(
+          "Cannot derive headers from objects after rows have been added",
+        );
+      }
       const columnSet = new Set();
       for (const obj of objects) {
         for (const key of Object.keys(obj)) {
