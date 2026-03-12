@@ -31,6 +31,15 @@ The following Excel features are explicitly out of scope and will not be support
 - Column letter encoding supports arbitrary column indices (A, Z, AA, AAA, etc.)
 - Performance degrades with very large datasets — see performance targets in the PRD
 
+## Grid Dimensions and Empty Cells
+
+- The writer skips empty cells in the XML output — no `<c>` element is emitted for cells with type `"empty"`
+- On round-trip, trailing empty columns and all-empty rows are not preserved because the reader infers grid dimensions only from non-empty cells
+- A row `["A", EMPTY, EMPTY]` will round-trip as `["A"]` since the trailing empty cells produce no XML
+- Interior empty cells (between non-empty cells) are preserved: `["A", EMPTY, "C"]` round-trips correctly
+- This matches Excel's own behavior — Excel does not emit `<c>` elements for trailing empty cells
+- If exact grid dimensions must survive round-trip, callers should store dimensions externally or use a sentinel value
+
 ## Sparse Worksheet Handling
 
 - The library does not use sparse representation

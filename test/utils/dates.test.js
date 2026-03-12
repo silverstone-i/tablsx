@@ -13,6 +13,11 @@ describe("excelDateToJS", () => {
     expect(d.toISOString()).toBe("1900-02-28T00:00:00.000Z");
   });
 
+  it("collapses serial 60 (phantom 1900-02-29) onto 1900-02-28", () => {
+    const d = excelDateToJS(60);
+    expect(d.toISOString()).toBe("1900-02-28T00:00:00.000Z");
+  });
+
   it("converts serial 61 to 1900-03-01 (skipping phantom leap day)", () => {
     const d = excelDateToJS(61);
     expect(d.toISOString()).toBe("1900-03-01T00:00:00.000Z");

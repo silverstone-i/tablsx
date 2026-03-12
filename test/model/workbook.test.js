@@ -67,6 +67,20 @@ describe("createWorkbook", () => {
     const wb = createWorkbook();
     expect(wb.sheets).toEqual([]);
   });
+
+  it("throws on duplicate sheet names", () => {
+    expect(() =>
+      createWorkbook([createWorksheet("Sheet1"), createWorksheet("Sheet1")]),
+    ).toThrow('Duplicate sheet name: "Sheet1"');
+  });
+
+  it("allows distinct sheet names", () => {
+    const wb = createWorkbook([
+      createWorksheet("Sheet1"),
+      createWorksheet("Sheet2"),
+    ]);
+    expect(wb.sheets.length).toBe(2);
+  });
 });
 
 describe("normalizeRows", () => {

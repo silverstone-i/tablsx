@@ -30,11 +30,27 @@ export function createWorksheet(name, rows = []) {
 }
 
 /**
+ * Validate that no two sheets share the same name.
+ * @param {Array<{ name: string }>} sheets
+ * @throws {Error} if duplicate names are found
+ */
+export function validateSheetNames(sheets) {
+  const names = new Set();
+  for (const sheet of sheets) {
+    if (names.has(sheet.name)) {
+      throw new Error(`Duplicate sheet name: "${sheet.name}"`);
+    }
+    names.add(sheet.name);
+  }
+}
+
+/**
  * Create a Workbook object.
  * @param {Array<object>} [sheets]
  * @returns {{ sheets: Array<object> }}
  */
 export function createWorkbook(sheets = []) {
+  validateSheetNames(sheets);
   return { sheets };
 }
 
