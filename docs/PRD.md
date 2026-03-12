@@ -291,11 +291,12 @@ src/
     styles-writer.js        # Generate xl/styles.xml
     content-types.js        # Generate [Content_Types].xml
   tabular/
-    index.js                # sheetFromRows(), rowsFromSheet()
+    index.js                # Re-exports sheetFromRows, rowsFromSheet, inferSchema
     schema.js               # Schema inference and column typing
     serializer.js           # Row object → Cell[] conversion
     parser.js               # Cell[] → row object conversion
   builder/
+    index.js                # Re-exports WorkbookBuilder, SheetBuilder
     workbook-builder.js     # WorkbookBuilder class
     sheet-builder.js        # SheetBuilder class
   utils/
@@ -627,10 +628,12 @@ The project must maintain Architecture Decision Records documenting key design d
 docs/adr/
   0001-internal-data-model.md
   0002-shared-strings-strategy.md
-  0003-vector-serialization-format.md
+  0003-zip-and-xml-library-selection.md
   0004-date-detection-approach.md
-  0005-api-design-plain-objects-vs-classes.md
-  ...
+  0005-vector-serialization-format.md
+  0006-formula-handling.md
+  0007-schema-inference-algorithm.md
+  0008-builder-api.md
 ```
 
 **ADR Template:**
@@ -780,15 +783,17 @@ docs/rules/
 ```
 test/fixtures/
   excel-generated/
+    generate.js               # Script to regenerate .xlsx fixtures
     basic-types.xlsx          # String, number, boolean, empty
-    dates.xlsx                # Various date formats
+    dates.xlsx                # Various date formats and edge cases
     formulas.xlsx             # Cells with formulas and cached values
-    multi-sheet.xlsx          # Multiple worksheets
-    large-dataset.xlsx        # 10k+ rows
+    multi-sheet.xlsx          # Multiple worksheets including empty sheet
+    large-dataset.xlsx        # 10,000 rows × 10 columns with mixed types
   synthetic/
-    all-types.json            # Expected output for all-types test
-    round-trip-input.json     # Input data for round-trip tests
+    all-types.test.js         # Comprehensive type testing (programmatic fixtures)
 ```
+
+The `excel-generated/` fixtures are produced by `generate.js` using the library's writer, then read back independently by `test/reader/excel-generated.test.js` to exercise the reader in isolation. To regenerate: `node test/fixtures/excel-generated/generate.js`.
 
 ### Coverage Target
 
