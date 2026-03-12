@@ -160,7 +160,7 @@ Workbook model
       → Generate worksheet XML from Cell objects
   → Generate workbook.xml, relationships, content types
   → Package all XML parts into ZIP
-  → Output .xlsx file (Buffer)
+  → Output .xlsx file (Uint8Array)
 ```
 
 ---
@@ -347,7 +347,7 @@ Build a minimal, working Excel reader and writer that handles the most common ce
 - Build a deduplicated shared strings table
 - Generate all required XML parts
 - Package into a ZIP container
-- Return a `Buffer` containing the `.xlsx` file
+- Return a `Uint8Array` containing the `.xlsx` file
 
 **Data Model**
 
@@ -399,7 +399,7 @@ Complete data type coverage for all Excel cell value types, including dates, for
   - Handle the 1900 leap year bug (Excel incorrectly treats 1900 as a leap year)
   - Handle time-only values (serial < 1)
   - Handle date+time values (fractional serial numbers)
-- On write: assign a default date number format (e.g., `yyyy-mm-dd`) and write the serial number
+- On write: assign the built-in date number format (`numFmtId=14`, `m/d/yyyy`) and write the serial number
 
 **Formula Support**
 
@@ -480,7 +480,7 @@ Provide high-level functions for converting between arrays of row objects and wo
   }
   ```
 - Type inference examines all non-header rows and picks the dominant type
-- Vector detection: columns where all non-null values are valid JSON arrays of numbers
+- Vector detection: STRING cells whose values are valid JSON arrays of numbers are tallied as VECTOR during dominant-type voting
 
 **Column Type Override**
 
@@ -597,8 +597,8 @@ const data = [
 
 const sheet = wb.sheet('Data')
 sheet.addObjects(data)
-// Automatically sets headers from first object's keys
-// Subsequent objects are matched by key name
+// Automatically sets headers from the key union of all provided objects
+// Each object's values are matched to headers by key name
 ```
 
 ### Design Constraint
@@ -817,8 +817,8 @@ The `excel-generated/` fixtures are produced by `generate.js` using the library'
 
 **Efficient XML Parsing**
 
-- Use a SAX-style or streaming XML parser for worksheet parsing (worksheets are typically the largest XML files)
-- Avoid building a full DOM tree for large worksheets
+- `fast-xml-parser` is used for all XML parsing (see ADR-0003), building a full object tree per document — this is simpler than SAX-style streaming and sufficient for the target dataset sizes
+- A future optimization could introduce SAX-style parsing for very large worksheets
 - Parse shared strings eagerly (they are typically small relative to worksheet data)
 
 **Shared String Optimization**
@@ -958,8 +958,8 @@ const buffer = writeXlsx(wb.build())
 | Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|
 | **Date detection unreliable** — Identifying date cells requires parsing `styles.xml` number formats, which have many variations | High | High | Maintain a curated list of known date format patterns. Provide fallback heuristics. Allow caller override via column type options. |
-| **Large file memory pressure** — 100k+ row worksheets can produce very large XML strings | Medium | High | Use SAX-style XML parsing for reads. Consider chunked XML generation for writes. Profile early with large datasets. |
-| **Floating-point precision loss** — IEEE 754 double precision may cause subtle differences in round-trip | Low | Medium | Use `Number.parseFloat` and avoid intermediate string conversions where possible. Test with known precision edge cases. |
+| **Large file memory pressure** — 100k+ row worksheets can produce very large XML strings | Medium | High | Current implementation uses DOM-style XML parsing (fast-xml-parser). A future optimization could introduce SAX-style parsing for very large worksheets. OOM protection caps dense grids at 10M cells. |
+| **Floating-point precision loss** — IEEE 754 double precision may cause subtle differences in round-trip | Low | Medium | Numbers are written via template literal interpolation, preserving full precision. Test with known precision edge cases. |
 | **Excel compatibility gaps** — Different Excel versions and applications (Google Sheets, LibreOffice) produce slightly different `.xlsx` structures | High | Medium | Test against files from multiple sources. Parse defensively (tolerate missing optional elements). Use a compatibility test suite. |
 | **Shared strings edge cases** — Rich text, phonetic runs, and other shared string variants | Medium | Low | Support plain `<t>` elements initially. Log warnings for unsupported rich text. Treat rich text as plain text (strip formatting). |
 | **ZIP library compatibility** — Different ZIP libraries handle edge cases differently (ZIP64, unicode filenames) | Low | Medium | Choose a well-maintained ZIP library. Test with files from multiple sources. |

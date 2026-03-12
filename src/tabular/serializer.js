@@ -10,7 +10,7 @@ import { excelDateToJS } from "../utils/dates.js";
 
 /**
  * Convert an array of plain objects into a Worksheet.
- * Keys from the first object become column headers (row 0).
+ * The key union of all objects becomes column headers (row 0).
  * Values are typed automatically via inferType, with optional overrides.
  * @param {Array<Object>} rows - array of plain objects
  * @param {{ name?: string, columns?: Record<string, { type: string }> }} [options]

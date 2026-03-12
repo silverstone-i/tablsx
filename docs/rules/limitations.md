@@ -46,6 +46,7 @@ The following Excel features are explicitly out of scope and will not be support
 - All rows are stored as dense arrays with the same column count
 - Shorter rows are padded with `{ value: null, formula: null, type: "empty" }` cells
 - A worksheet with data at A1 and Z1 will have 26 cells in that row, with 24 empty cells between them
+- **OOM protection**: if the dense grid implied by cell references would exceed 10,000,000 cells (e.g., a single cell at `XFD1048576`), the reader compacts the grid to span only the rows and columns that contain data, remapping indices accordingly. This prevents out-of-memory crashes from adversarial or malformed files but means the original absolute cell positions are not preserved for extremely sparse worksheets
 
 ## Rich Text
 

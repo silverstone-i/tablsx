@@ -33,7 +33,7 @@ When `createCell()` is called without an explicit type, `inferType(value)` deter
 
 1. `null` or `undefined` → `EMPTY`
 2. `typeof value === "string"` → `STRING`
-3. `typeof value === "number"` → `NUMBER`
+3. `typeof value === "number"` → `NUMBER` (throws if `NaN`, `Infinity`, or `-Infinity`)
 4. `typeof value === "boolean"` → `BOOLEAN`
 5. `value instanceof Date` → `DATE`
 6. `Array.isArray(value) && value.every(v => typeof v === "number")` → `VECTOR`
