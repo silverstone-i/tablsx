@@ -23,7 +23,14 @@ export function sheetFromRows(rows, options = {}) {
     return createWorksheet(sheetName, []);
   }
 
-  const columnNames = Object.keys(rows[0]);
+  // Build column union from all rows so keys absent from the first row are not lost
+  const columnSet = new Set();
+  for (const row of rows) {
+    for (const key of Object.keys(row)) {
+      columnSet.add(key);
+    }
+  }
+  const columnNames = [...columnSet];
   const columnOverrides = options.columns ?? {};
 
   const headerRow = columnNames.map((name) => createCell(name));

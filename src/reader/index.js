@@ -4,6 +4,7 @@ import { parseSharedStrings } from "./shared-strings.js";
 import { parseWorkbook, parseWorkbookRels } from "./workbook-parser.js";
 import { parseWorksheet } from "./worksheet-parser.js";
 import { parseDateStyles } from "./styles-parser.js";
+import { posix } from "node:path";
 import {
   createWorkbook,
   createWorksheet,
@@ -52,7 +53,9 @@ export function readXlsx(buffer) {
       );
     }
 
-    const sheetPath = target.startsWith("/") ? target.slice(1) : `xl/${target}`;
+    const sheetPath = target.startsWith("/")
+      ? target.slice(1)
+      : posix.normalize(`xl/${target}`);
     const sheetXml = readFileAsString(files, sheetPath);
     if (!sheetXml) {
       throw new Error(

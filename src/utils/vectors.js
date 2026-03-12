@@ -5,6 +5,9 @@
  * @returns {string}
  */
 export function serializeVector(arr) {
+  if (!Array.isArray(arr) || !arr.every((v) => Number.isFinite(v))) {
+    throw new Error("serializeVector requires an array of finite numbers");
+  }
   return JSON.stringify(arr);
 }
 

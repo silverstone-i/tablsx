@@ -149,4 +149,29 @@ describe("rowsFromSheet", () => {
     expect(rows[0]["First Name"]).toBe("Alice");
     expect(rows[0]["age (years)"]).toBe(30);
   });
+
+  it("disambiguates duplicate header names", () => {
+    const sheet = {
+      name: "Sheet1",
+      rows: [
+        [createCell("id"), createCell("id"), createCell("id")],
+        [createCell(1), createCell(2), createCell(3)],
+      ],
+    };
+    const rows = rowsFromSheet(sheet);
+    expect(rows[0]).toEqual({ id: 1, id_2: 2, id_3: 3 });
+  });
+
+  it("treats null header cells as empty string", () => {
+    const sheet = {
+      name: "Sheet1",
+      rows: [
+        [createCell(null, null, CellType.EMPTY), createCell("b")],
+        [createCell("x"), createCell("y")],
+      ],
+    };
+    const rows = rowsFromSheet(sheet);
+    expect(rows[0][""]).toBe("x");
+    expect(rows[0]["b"]).toBe("y");
+  });
 });

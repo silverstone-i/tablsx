@@ -18,7 +18,7 @@ export function inferSchema(sheet) {
   const dataRows = sheet.rows.slice(1);
 
   const columns = headers.map((headerCell, colIndex) => {
-    const name = String(headerCell.value);
+    const name = headerCell.value == null ? "" : String(headerCell.value);
     const typeCounts = new Map();
     let hasEmpty = false;
 

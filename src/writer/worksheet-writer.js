@@ -37,8 +37,12 @@ export function generateWorksheetXml(sheet, sharedStringsMap) {
           parts.push(`<c r="${ref}" t="s"><v>${idx}</v></c>`);
         } else {
           // String not in shared strings table (e.g. null value) — write inline
+          const inlineVal = String(cell.value ?? "");
+          const spaceAttr = /^\s|\s$/.test(inlineVal)
+            ? ' xml:space="preserve"'
+            : "";
           parts.push(
-            `<c r="${ref}" t="inlineStr"><is><t>${escapeXml(String(cell.value ?? ""))}</t></is></c>`,
+            `<c r="${ref}" t="inlineStr"><is><t${spaceAttr}>${escapeXml(inlineVal)}</t></is></c>`,
           );
         }
       } else if (cell.type === CellType.NUMBER) {
@@ -50,6 +54,11 @@ export function generateWorksheetXml(sheet, sharedStringsMap) {
           cell.value instanceof Date
             ? jsDateToExcel(cell.value)
             : Number(cell.value);
+        if (!Number.isFinite(serial)) {
+          throw new Error(
+            `Invalid DATE cell at ${ref}: value produces non-finite serial ${serial}`,
+          );
+        }
         parts.push(
           `<c r="${ref}" s="${DATE_STYLE_INDEX}"><v>${serial}</v></c>`,
         );

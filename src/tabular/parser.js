@@ -15,7 +15,18 @@ export function rowsFromSheet(sheet, options = {}) {
     return [];
   }
 
-  const headers = sheet.rows[0].map((cell) => String(cell.value));
+  const rawHeaders = sheet.rows[0].map((cell) =>
+    cell.value == null ? "" : String(cell.value),
+  );
+
+  // Disambiguate duplicate header names by appending _2, _3, etc.
+  const seen = new Map();
+  const headers = rawHeaders.map((name) => {
+    const count = seen.get(name) ?? 0;
+    seen.set(name, count + 1);
+    return count === 0 ? name : `${name}_${count + 1}`;
+  });
+
   const columnOverrides = options.columns ?? {};
   const dataRows = sheet.rows.slice(1);
 

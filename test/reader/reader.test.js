@@ -51,4 +51,20 @@ describe("readXlsx error handling", () => {
     const result = readXlsx(buffer);
     expect(result.sheets[0].rows[0][0].value).toBe("ok");
   });
+
+  it("resolves relationship targets with .. path segments", () => {
+    const zip = makeZip({
+      "[Content_Types].xml": "<Types/>",
+      "_rels/.rels": "<Relationships/>",
+      "xl/workbook.xml":
+        '<?xml version="1.0"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Sheet1" sheetId="1" r:id="rId1"/></sheets></workbook>',
+      "xl/_rels/workbook.xml.rels":
+        '<?xml version="1.0"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="../worksheets/sheet1.xml"/></Relationships>',
+      "worksheets/sheet1.xml":
+        '<?xml version="1.0"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData><row r="1"><c r="A1" t="inlineStr"><is><t>hello</t></is></c></row></sheetData></worksheet>',
+    });
+    const result = readXlsx(zip);
+    expect(result.sheets[0].name).toBe("Sheet1");
+    expect(result.sheets[0].rows[0][0].value).toBe("hello");
+  });
 });

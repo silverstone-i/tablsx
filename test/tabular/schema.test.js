@@ -185,4 +185,17 @@ describe("inferSchema", () => {
       { name: "active", type: "boolean", nullable: false },
     ]);
   });
+
+  it("uses empty string for null header cells instead of 'null'", () => {
+    const sheet = {
+      name: "Sheet1",
+      rows: [
+        [createCell(null, null, CellType.EMPTY), createCell("b")],
+        [createCell(1), createCell(2)],
+      ],
+    };
+    const result = inferSchema(sheet);
+    expect(result.columns[0].name).toBe("");
+    expect(result.columns[1].name).toBe("b");
+  });
 });

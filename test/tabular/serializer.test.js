@@ -133,4 +133,16 @@ describe("sheetFromRows", () => {
     const sheet = sheetFromRows([{ a: 1, b: 2, c: 3 }, { a: 4 }]);
     expect(sheet.rows[1].length).toBe(sheet.rows[2].length);
   });
+
+  it("includes keys from all rows, not just the first", () => {
+    const sheet = sheetFromRows([{ a: 1 }, { a: 2, b: 3 }]);
+    const headers = sheet.rows[0].map((c) => c.value);
+    expect(headers).toContain("a");
+    expect(headers).toContain("b");
+    // Second row should have b = 3
+    const bIndex = headers.indexOf("b");
+    expect(sheet.rows[2][bIndex].value).toBe(3);
+    // First row should have EMPTY for b
+    expect(sheet.rows[1][bIndex].type).toBe(CellType.EMPTY);
+  });
 });
