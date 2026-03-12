@@ -27,7 +27,14 @@ export function isCellType(type) {
 export function inferType(value) {
   if (value === null || value === undefined) return CellType.EMPTY;
   if (typeof value === "string") return CellType.STRING;
-  if (typeof value === "number") return CellType.NUMBER;
+  if (typeof value === "number") {
+    if (!Number.isFinite(value)) {
+      throw new Error(
+        `Non-finite number (${value}) cannot be represented in XLSX`,
+      );
+    }
+    return CellType.NUMBER;
+  }
   if (typeof value === "boolean") return CellType.BOOLEAN;
   if (value instanceof Date) return CellType.DATE;
   if (Array.isArray(value) && value.every((v) => typeof v === "number"))

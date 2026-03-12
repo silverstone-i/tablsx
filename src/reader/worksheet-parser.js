@@ -50,6 +50,27 @@ export function parseWorksheet(xml, sharedStrings, dateStyles = new Set()) {
 
   if (cellData.length === 0) return [];
 
+  // Safety: prevent OOM from sparse workbooks with far-out cell refs.
+  // A single cell at XFD1048576 would otherwise allocate a dense grid
+  // of ~17 billion cells. Cap to a reasonable maximum.
+  const MAX_DENSE_CELLS = 10_000_000;
+  const denseSize = (maxRow + 1) * (maxCol + 1);
+  if (denseSize > MAX_DENSE_CELLS) {
+    // Compact the grid to only span the actual data extent
+    const usedRows = new Set(cellData.map((d) => d.row));
+    const usedCols = new Set(cellData.map((d) => d.col));
+    const sortedRows = [...usedRows].sort((a, b) => a - b);
+    const sortedCols = [...usedCols].sort((a, b) => a - b);
+    const rowMap = new Map(sortedRows.map((r, i) => [r, i]));
+    const colMap = new Map(sortedCols.map((c, i) => [c, i]));
+    maxRow = sortedRows.length - 1;
+    maxCol = sortedCols.length - 1;
+    for (const d of cellData) {
+      d.row = rowMap.get(d.row);
+      d.col = colMap.get(d.col);
+    }
+  }
+
   // Build the 2D array
   const rows = [];
   for (let r = 0; r <= maxRow; r++) {

@@ -22,3 +22,4 @@ export {
   isVectorString,
 } from "./utils/vectors.js";
 export { sheetFromRows, rowsFromSheet, inferSchema } from "./tabular/index.js";
+export { WorkbookBuilder, SheetBuilder } from "./builder/index.js";
