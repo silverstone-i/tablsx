@@ -2,7 +2,7 @@
 
 Defines the rules for first-row-as-headers behavior in the tabular data layer.
 
-> **Note**: Header detection is primarily a Phase 3 (tabular data interchange) concern. This document describes the conventions that will apply to `sheetFromRows()` and `rowsFromSheet()`.
+> **Note**: Header detection is primarily a tabular data interchange concern. This document describes the conventions that apply to `sheetFromRows()`, `rowsFromSheet()`, `SheetBuilder.addObjects()`, and `SheetReader.toObjects()`.
 
 ## Default Behavior
 
@@ -16,12 +16,13 @@ Defines the rules for first-row-as-headers behavior in the tabular data layer.
 |---|---|
 | `sheetFromRows(objects)` | Union of keys from all objects |
 | `rowsFromSheet(sheet)` | First row cell values |
-| `SheetBuilder.addObjects(objects)` | Keys of the first object (Phase 4) |
+| `SheetBuilder.addObjects(objects)` | Union of keys from all provided objects; delegates to `sheetFromRows()` (Phase 4) |
 | `SheetBuilder.setHeaders(headers)` | Explicitly provided array (Phase 4) |
+| `SheetReader.toObjects()` | First row cell values (with duplicate-name disambiguation); delegates to `rowsFromSheet()`. Accepts explicit `headers` option (Phase 4) |
 
 ## Duplicate Header Names
 
-- Duplicate header names in `rowsFromSheet()` are automatically disambiguated by appending `_2`, `_3`, etc. (e.g., `["id", "id", "id"]` becomes `["id", "id_2", "id_3"]`)
+- Duplicate header names in `rowsFromSheet()` (and `SheetReader.toObjects()`, which delegates to it) are automatically disambiguated by appending `_2`, `_3`, etc. (e.g., `["id", "id", "id"]` becomes `["id", "id_2", "id_3"]`)
 - This prevents silent data loss when converting to objects, where later columns would otherwise overwrite earlier ones
 - The original header text is preserved for the first occurrence; only subsequent duplicates receive a suffix
 

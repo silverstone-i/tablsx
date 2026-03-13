@@ -1,13 +1,15 @@
-# ADR-0008: Builder API
+# ADR-0008: Convenience API (Builder and Reader)
 
 ## Status
 Accepted
 
 ## Context
-Phases 1–3 provide a plain-object data model (`createWorkbook`, `createWorksheet`, `createCell`) and a tabular interchange layer (`sheetFromRows`). While powerful, constructing workbooks programmatically requires verbose boilerplate — manually creating cells, normalizing row lengths, and assembling the workbook structure. Phase 4 introduces a convenience layer for common authoring workflows.
+Phases 1–3 provide a plain-object data model (`createWorkbook`, `createWorksheet`, `createCell`) and a tabular interchange layer (`sheetFromRows`, `rowsFromSheet`). While powerful, both constructing and navigating workbooks programmatically require verbose boilerplate — manually creating cells, normalizing row lengths, assembling the workbook structure, and indexing into nested arrays to access values. Phase 4 introduces convenience classes for both writing and reading workflows.
 
 ## Decision
-We adopt a **builder pattern** with two classes — `WorkbookBuilder` and `SheetBuilder` — that wrap the existing plain-object model. Key design choices:
+We adopt **thin wrapper classes** for both authoring and reading that wrap the existing plain-object model:
+
+### Builder classes (`WorkbookBuilder`, `SheetBuilder`)
 
 1. **Thin wrapper, not alternative data path.** `build()` produces the same `Workbook`/`Worksheet`/`Cell` plain objects used everywhere else. The builder delegates to `createCell`, `normalizeRows`, and `createWorkbook`.
 
@@ -17,7 +19,17 @@ We adopt a **builder pattern** with two classes — `WorkbookBuilder` and `Sheet
 
 4. **Type inference reuse.** The builder relies on `createCell` → `inferType` for all value-to-cell conversion, ensuring identical type rules across the entire API surface.
 
-5. **`addObjects` mirrors `sheetFromRows` semantics.** Key union for headers, JSON.stringify for nested objects, empty cells for missing keys.
+5. **`addObjects` delegates to `sheetFromRows`.** Key union for headers, JSON.stringify for nested objects, empty cells for missing keys, column type overrides via `options.columns`.
+
+### Reader classes (`WorkbookReader`, `SheetReader`)
+
+1. **Read-only wrapper over parsed data.** `WorkbookReader` wraps a `Workbook` object (from `readXlsx` or `WorkbookBuilder.build()`), providing sheet access by name or index. `SheetReader` wraps a single `Worksheet`.
+
+2. **Multiple construction paths.** `WorkbookReader.fromBuffer(buffer)` parses an `.xlsx` file directly. `WorkbookReader.fromWorkbook(workbook)` wraps an existing plain-object workbook.
+
+3. **Value extraction shortcuts.** `SheetReader.toValues()` strips Cell metadata to return a plain `any[][]`. `SheetReader.toObjects()` delegates to `rowsFromSheet()` for duplicate-header disambiguation, column type overrides (vector, date), and automatic vector deserialization.
+
+4. **Bounds-checked access.** `getRow(index)` and `getCell(row, col)` throw `RangeError` for out-of-bounds indices. `sheet(name)` throws for unknown sheet names.
 
 ## Alternatives Considered
 
@@ -27,9 +39,12 @@ We adopt a **builder pattern** with two classes — `WorkbookBuilder` and `Sheet
 
 **Merging builder into `sheetFromRows`:** `sheetFromRows` handles the object-to-sheet case well but doesn't cover raw row construction or incremental building.
 
+**Using `rowsFromSheet` directly instead of `SheetReader.toObjects()`:** `toObjects()` now delegates to `rowsFromSheet()` internally, so both share the same capabilities — duplicate header disambiguation, column type overrides, and vector/date deserialization. The class method adds ergonomic sheet access; the standalone function works on plain objects.
+
 ## Consequences
 
-- Developers get a concise API for the most common workbook-construction patterns.
-- The builder adds no new data types or behaviors — it is purely ergonomic.
+- Developers get a concise API for the most common workbook construction and reading patterns.
+- The convenience classes add no new data types or behaviors — they are purely ergonomic.
 - The internal data model remains unchanged and JSON-serializable.
-- Both the low-level (`createCell`/`createWorksheet`) and high-level (`WorkbookBuilder`) APIs coexist; users choose based on their needs.
+- Both the low-level (`createCell`/`createWorksheet`) and high-level (`WorkbookBuilder`/`WorkbookReader`) APIs coexist; users choose based on their needs.
+- `SheetReader.toObjects()` delegates to `rowsFromSheet()` and `SheetBuilder.addObjects()` delegates to `sheetFromRows()` — the classes are convenience wrappers over the tabular layer, not alternative implementations.

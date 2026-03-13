@@ -19,7 +19,7 @@ Status: Draft
 8. [Phase 1 — Core XLSX Engine (MVP)](#8-phase-1--core-xlsx-engine-mvp)
 9. [Phase 2 — Full Data Type Support](#9-phase-2--full-data-type-support)
 10. [Phase 3 — Tabular Data Interchange](#10-phase-3--tabular-data-interchange)
-11. [Phase 4 — Public Authoring Convenience Layer](#11-phase-4--public-authoring-convenience-layer)
+11. [Phase 4 — Public Convenience Layer](#11-phase-4--public-convenience-layer)
 12. [Documentation Requirements](#12-documentation-requirements)
 13. [Testing Strategy](#13-testing-strategy)
 14. [Performance Considerations](#14-performance-considerations)
@@ -160,7 +160,7 @@ Workbook model
       → Generate worksheet XML from Cell objects
   → Generate workbook.xml, relationships, content types
   → Package all XML parts into ZIP
-  → Output .xlsx file (Buffer)
+  → Output .xlsx file (Uint8Array)
 ```
 
 ---
@@ -282,6 +282,8 @@ src/
     worksheet-parser.js     # Parse xl/worksheets/sheetN.xml
     shared-strings.js       # Parse xl/sharedStrings.xml
     styles-parser.js        # Parse xl/styles.xml (for date detection)
+    workbook-reader.js      # WorkbookReader convenience class
+    sheet-reader.js         # SheetReader convenience class
   writer/
     index.js                # writeXlsx() entry point
     zip.js                  # ZIP packaging
@@ -291,11 +293,12 @@ src/
     styles-writer.js        # Generate xl/styles.xml
     content-types.js        # Generate [Content_Types].xml
   tabular/
-    index.js                # sheetFromRows(), rowsFromSheet()
+    index.js                # Re-exports sheetFromRows, rowsFromSheet, inferSchema
     schema.js               # Schema inference and column typing
     serializer.js           # Row object → Cell[] conversion
     parser.js               # Cell[] → row object conversion
   builder/
+    index.js                # Re-exports WorkbookBuilder, SheetBuilder
     workbook-builder.js     # WorkbookBuilder class
     sheet-builder.js        # SheetBuilder class
   utils/
@@ -346,7 +349,7 @@ Build a minimal, working Excel reader and writer that handles the most common ce
 - Build a deduplicated shared strings table
 - Generate all required XML parts
 - Package into a ZIP container
-- Return a `Buffer` containing the `.xlsx` file
+- Return a `Uint8Array` containing the `.xlsx` file
 
 **Data Model**
 
@@ -398,7 +401,7 @@ Complete data type coverage for all Excel cell value types, including dates, for
   - Handle the 1900 leap year bug (Excel incorrectly treats 1900 as a leap year)
   - Handle time-only values (serial < 1)
   - Handle date+time values (fractional serial numbers)
-- On write: assign a default date number format (e.g., `yyyy-mm-dd`) and write the serial number
+- On write: assign the built-in date number format (`numFmtId=14`, `m/d/yyyy`) and write the serial number
 
 **Formula Support**
 
@@ -479,7 +482,7 @@ Provide high-level functions for converting between arrays of row objects and wo
   }
   ```
 - Type inference examines all non-header rows and picks the dominant type
-- Vector detection: columns where all non-null values are valid JSON arrays of numbers
+- Vector detection: STRING cells whose values are valid JSON arrays of numbers are tallied as VECTOR during dominant-type voting
 
 **Column Type Override**
 
@@ -529,11 +532,11 @@ const schema = inferSchema(sheet)
 
 ---
 
-## 11. Phase 4 — Public Authoring Convenience Layer
+## 11. Phase 4 — Public Convenience Layer
 
 ### Goal
 
-Provide a developer-friendly builder API for constructing workbooks programmatically. The builder wraps the internal data model — it does not replace it.
+Provide developer-friendly convenience classes for constructing and reading workbooks programmatically. These classes wrap the internal data model — they do not replace it.
 
 ### Scope
 
@@ -553,7 +556,8 @@ class WorkbookBuilder {
 class SheetBuilder {
   addRow(values: any[])              // Append a row of raw values
   addRows(rows: any[][])             // Append multiple rows
-  addObjects(objects: object[])      // Append rows from objects (first call sets headers)
+  addObjects(objects: object[], options?: { columns?: Record<string, { type: string }> })
+                                     // Append rows from objects; delegates to sheetFromRows()
   setHeaders(headers: string[])      // Explicitly set column headers
   build()                            // → Worksheet (internal data model)
 }
@@ -596,13 +600,52 @@ const data = [
 
 const sheet = wb.sheet('Data')
 sheet.addObjects(data)
-// Automatically sets headers from first object's keys
-// Subsequent objects are matched by key name
+// Automatically sets headers from the key union of all provided objects
+// Each object's values are matched to headers by key name
+```
+
+**WorkbookReader**
+
+```js
+class WorkbookReader {
+  static fromBuffer(buffer: Buffer|Uint8Array)  // → WorkbookReader (parse .xlsx)
+  static fromWorkbook(workbook: Workbook)       // → WorkbookReader (wrap existing)
+  get sheetNames: string[]                      // Sheet names in order
+  get sheetCount: number                        // Number of sheets
+  sheet(nameOrIndex: string|number)             // → SheetReader
+}
+```
+
+**SheetReader**
+
+```js
+class SheetReader {
+  get name: string                              // Sheet name
+  get rows: Cell[][]                            // Raw cell grid
+  get rowCount: number                          // Number of rows
+  get columnCount: number                       // Number of columns
+  getRow(index: number)                         // → Cell[] (single row)
+  getCell(row: number, col: number)             // → Cell (single cell)
+  toValues()                                    // → any[][] (strip Cell metadata)
+  toObjects(options?: { headers?: string[], columns?: Record<string, { type: string }> })
+                                                // → object[] (delegates to rowsFromSheet)
+}
+```
+
+**Integration with read**
+
+```js
+import { WorkbookReader } from 'tablsx'
+
+const reader = WorkbookReader.fromBuffer(buffer)
+console.log(reader.sheetNames)                    // ['Sheet1', 'Sheet2']
+const sheet = reader.sheet('Sheet1')
+const rows = sheet.toObjects()                    // [{ Name: 'Alice', Age: 30 }, ...]
 ```
 
 ### Design Constraint
 
-The builder must always produce the same internal `Workbook`/`Worksheet`/`Cell` structures used by the reader and writer. It is a convenience layer, not an alternative data path.
+The builder and reader convenience classes must always operate on the same internal `Workbook`/`Worksheet`/`Cell` structures used by `readXlsx` and `writeXlsx`. They are convenience layers, not alternative data paths.
 
 ### Acceptance Criteria
 
@@ -610,6 +653,9 @@ The builder must always produce the same internal `Workbook`/`Worksheet`/`Cell` 
 - `addObjects` correctly maps object keys to column headers
 - Type inference matches the same rules used in `sheetFromRows`
 - `wb.build()` returns a standard `Workbook` object compatible with `writeXlsx`
+- `WorkbookReader.fromBuffer` produces the same data as `readXlsx`
+- `SheetReader.toObjects()` round-trips with `SheetBuilder.addObjects()`
+- `SheetReader.toValues()` returns a plain 2D array of cell values
 
 ---
 
@@ -627,10 +673,12 @@ The project must maintain Architecture Decision Records documenting key design d
 docs/adr/
   0001-internal-data-model.md
   0002-shared-strings-strategy.md
-  0003-vector-serialization-format.md
+  0003-zip-and-xml-library-selection.md
   0004-date-detection-approach.md
-  0005-api-design-plain-objects-vs-classes.md
-  ...
+  0005-vector-serialization-format.md
+  0006-formula-handling.md
+  0007-schema-inference-algorithm.md
+  0008-builder-api.md          # Also covers WorkbookReader/SheetReader
 ```
 
 **ADR Template:**
@@ -665,7 +713,7 @@ What becomes easier or more difficult as a result of this decision?
 | ADR-0005 | 2 | Vector serialization: JSON string vs delimited format |
 | ADR-0006 | 2 | Formula handling: store-only approach |
 | ADR-0007 | 3 | Schema inference algorithm |
-| ADR-0008 | 4 | Builder API: builder pattern vs fluent interface |
+| ADR-0008 | 4 | Convenience API: builder and reader wrapper classes |
 
 ### Rules Documentation
 
@@ -769,6 +817,15 @@ docs/rules/
 - Missing/null value handling
 - Objects with inconsistent keys
 
+**Convenience API Tests**
+
+- `WorkbookReader.fromBuffer` creates readers from `.xlsx` buffers
+- `WorkbookReader.fromWorkbook` wraps an existing Workbook
+- `SheetReader.toObjects()` round-trips with `SheetBuilder.addObjects()`
+- `SheetReader.toValues()` returns plain 2D value arrays
+- Sheet access by name and by index, with error handling for out-of-bounds
+- Cell-level access via `getRow()` and `getCell()`
+
 **Large Dataset Tests**
 
 - 100,000 rows × 20 columns with mixed types
@@ -780,15 +837,17 @@ docs/rules/
 ```
 test/fixtures/
   excel-generated/
+    generate.js               # Script to regenerate .xlsx fixtures
     basic-types.xlsx          # String, number, boolean, empty
-    dates.xlsx                # Various date formats
+    dates.xlsx                # Various date formats and edge cases
     formulas.xlsx             # Cells with formulas and cached values
-    multi-sheet.xlsx          # Multiple worksheets
-    large-dataset.xlsx        # 10k+ rows
+    multi-sheet.xlsx          # Multiple worksheets including empty sheet
+    large-dataset.xlsx        # 10,000 rows × 10 columns with mixed types
   synthetic/
-    all-types.json            # Expected output for all-types test
-    round-trip-input.json     # Input data for round-trip tests
+    all-types.test.js         # Comprehensive type testing (programmatic fixtures)
 ```
+
+The `excel-generated/` fixtures are produced by `generate.js` using the library's writer, then read back independently by `test/reader/excel-generated.test.js` to exercise the reader in isolation. To regenerate: `node test/fixtures/excel-generated/generate.js`.
 
 ### Coverage Target
 
@@ -812,8 +871,8 @@ test/fixtures/
 
 **Efficient XML Parsing**
 
-- Use a SAX-style or streaming XML parser for worksheet parsing (worksheets are typically the largest XML files)
-- Avoid building a full DOM tree for large worksheets
+- `fast-xml-parser` is used for all XML parsing (see ADR-0003), building a full object tree per document — this is simpler than SAX-style streaming and sufficient for the target dataset sizes
+- A future optimization could introduce SAX-style parsing for very large worksheets
 - Parse shared strings eagerly (they are typically small relative to worksheet data)
 
 **Shared String Optimization**
@@ -944,6 +1003,34 @@ embeddings.addObjects([
 const buffer = writeXlsx(wb.build())
 ```
 
+### Reader Convenience API (Phase 4)
+
+```js
+import { WorkbookReader } from 'tablsx'
+import { readFile } from 'node:fs/promises'
+
+const buffer = await readFile('input.xlsx')
+const reader = WorkbookReader.fromBuffer(buffer)
+
+// Explore structure
+console.log(reader.sheetNames)          // ['Employees', 'Embeddings']
+console.log(reader.sheetCount)          // 2
+
+// Access by name or index
+const sheet = reader.sheet('Employees')
+console.log(sheet.rowCount)             // 4
+console.log(sheet.columnCount)          // 4
+
+// Quick value extraction
+const values = sheet.toValues()         // [['Name', 'Age', ...], ['Alice', 30, ...], ...]
+
+// Object conversion (first row as headers)
+const rows = sheet.toObjects()          // [{ Name: 'Alice', Age: 30, ... }, ...]
+
+// Cell-level access
+const cell = sheet.getCell(1, 0)        // { value: 'Alice', formula: null, type: 'string' }
+```
+
 ---
 
 ## 16. Risk Analysis
@@ -953,8 +1040,8 @@ const buffer = writeXlsx(wb.build())
 | Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|
 | **Date detection unreliable** — Identifying date cells requires parsing `styles.xml` number formats, which have many variations | High | High | Maintain a curated list of known date format patterns. Provide fallback heuristics. Allow caller override via column type options. |
-| **Large file memory pressure** — 100k+ row worksheets can produce very large XML strings | Medium | High | Use SAX-style XML parsing for reads. Consider chunked XML generation for writes. Profile early with large datasets. |
-| **Floating-point precision loss** — IEEE 754 double precision may cause subtle differences in round-trip | Low | Medium | Use `Number.parseFloat` and avoid intermediate string conversions where possible. Test with known precision edge cases. |
+| **Large file memory pressure** — 100k+ row worksheets can produce very large XML strings | Medium | High | Current implementation uses DOM-style XML parsing (fast-xml-parser). A future optimization could introduce SAX-style parsing for very large worksheets. OOM protection caps dense grids at 10M cells. |
+| **Floating-point precision loss** — IEEE 754 double precision may cause subtle differences in round-trip | Low | Medium | Numbers are written via template literal interpolation, preserving full precision. Test with known precision edge cases. |
 | **Excel compatibility gaps** — Different Excel versions and applications (Google Sheets, LibreOffice) produce slightly different `.xlsx` structures | High | Medium | Test against files from multiple sources. Parse defensively (tolerate missing optional elements). Use a compatibility test suite. |
 | **Shared strings edge cases** — Rich text, phonetic runs, and other shared string variants | Medium | Low | Support plain `<t>` elements initially. Log warnings for unsupported rich text. Treat rich text as plain text (strip formatting). |
 | **ZIP library compatibility** — Different ZIP libraries handle edge cases differently (ZIP64, unicode filenames) | Low | Medium | Choose a well-maintained ZIP library. Test with files from multiple sources. |

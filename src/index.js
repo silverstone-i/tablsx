@@ -23,3 +23,5 @@ export {
 } from "./utils/vectors.js";
 export { sheetFromRows, rowsFromSheet, inferSchema } from "./tabular/index.js";
 export { WorkbookBuilder, SheetBuilder } from "./builder/index.js";
+export { WorkbookReader } from "./reader/workbook-reader.js";
+export { SheetReader } from "./reader/sheet-reader.js";

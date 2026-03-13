@@ -81,6 +81,28 @@ describe("createWorkbook", () => {
     ]);
     expect(wb.sheets.length).toBe(2);
   });
+
+  it("throws on sheet name exceeding 31 characters", () => {
+    const longName = "A".repeat(32);
+    expect(() => createWorkbook([createWorksheet(longName)])).toThrow(
+      "exceeds Excel's 31-character limit",
+    );
+  });
+
+  it("allows sheet name of exactly 31 characters", () => {
+    const name = "A".repeat(31);
+    const wb = createWorkbook([createWorksheet(name)]);
+    expect(wb.sheets.length).toBe(1);
+  });
+
+  it.each(["[", "]", ":", "*", "?", "/", "\\"])(
+    "throws on sheet name containing '%s'",
+    (char) => {
+      expect(() => createWorkbook([createWorksheet(`Sheet${char}1`)])).toThrow(
+        `contains invalid character: "${char}"`,
+      );
+    },
+  );
 });
 
 describe("normalizeRows", () => {

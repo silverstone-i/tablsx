@@ -203,4 +203,38 @@ describe("parseWorksheet", () => {
     expect(rows[0][0].value).toBe("not-a-number");
     expect(rows[0][0].type).toBe(CellType.STRING);
   });
+
+  it("parses cells without r attribute using positional order", () => {
+    const xml = wrapSheet(
+      '<row r="1"><c t="s"><v>0</v></c><c t="s"><v>1</v></c></row>',
+    );
+    const rows = parseWorksheet(xml, ["Hello", "World"]);
+
+    expect(rows.length).toBe(1);
+    expect(rows[0].length).toBe(2);
+    expect(rows[0][0].value).toBe("Hello");
+    expect(rows[0][1].value).toBe("World");
+  });
+
+  it("handles mix of cells with and without r attribute", () => {
+    const xml = wrapSheet(
+      '<row r="1"><c r="A1"><v>1</v></c><c><v>2</v></c><c><v>3</v></c></row>',
+    );
+    const rows = parseWorksheet(xml, []);
+
+    expect(rows[0].length).toBe(3);
+    expect(rows[0][0].value).toBe(1);
+    expect(rows[0][1].value).toBe(2);
+    expect(rows[0][2].value).toBe(3);
+  });
+
+  it("positions implicit cells after the last explicit ref", () => {
+    const xml = wrapSheet(
+      '<row r="1"><c r="C1"><v>10</v></c><c><v>20</v></c></row>',
+    );
+    const rows = parseWorksheet(xml, []);
+
+    expect(rows[0][2].value).toBe(10);
+    expect(rows[0][3].value).toBe(20);
+  });
 });

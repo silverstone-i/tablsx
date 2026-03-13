@@ -14,7 +14,7 @@ The following cell types are preserved exactly through a full cycle:
 | `DATE` | Year, month, day, hour, minute, second preserved (milliseconds may have sub-ms rounding from serial conversion) |
 | `EMPTY` | Empty cells remain empty |
 | `FORMULA` | Formula string and cached value both preserved |
-| `VECTOR` | Written as JSON string via shared strings; read back as `STRING` in Phase 1 (reader does not yet deserialize vectors) |
+| `VECTOR` | Written as JSON string via shared strings; read back as `STRING` by the reader (automatic deserialization requires explicit column overrides or schema inference via the tabular layer) |
 
 ## Cell Structure Preservation
 
@@ -33,7 +33,7 @@ Each cell's three properties are preserved:
 ## Floating-Point Precision
 
 - Numbers are written as full-precision strings (no truncation or rounding)
-- `JSON.stringify(number)` is used for XML output, which preserves all significant digits
+- Template literal interpolation (`${cell.value}`) is used for numeric XML output, which preserves all significant digits
 - Date serial conversion uses `Math.round()` on milliseconds to avoid sub-millisecond drift
 
 ## Formula Round-Trip

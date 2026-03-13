@@ -41,14 +41,15 @@ Example: `[0.1, 0.2, 0.3]` → `"[0.1,0.2,0.3]"`
 ## Precision Guarantees
 
 - IEEE 754 double-precision floating-point numbers round-trip through `JSON.stringify`/`JSON.parse` without precision loss
-- Special values (`NaN`, `Infinity`, `-Infinity`) do NOT round-trip through JSON serialization — these are not valid JSON numbers
+- Special values (`NaN`, `Infinity`, `-Infinity`) cause `serializeVector` to throw — it requires an array of finite numbers. These values cannot be stored in vector cells
 - The precision boundary is JavaScript's `Number` type (53-bit mantissa)
 
 ## Opt-In vs Automatic Detection
 
 - **On write**: automatic — `VECTOR` cells are detected by `inferType()` when the value is `number[]`
-- **On read (Phase 1–2)**: vectors are stored as string cells; no automatic detection
-- **On read (Phase 3)**: callers may opt in to vector deserialization via column type overrides or schema inference using `isVectorString()`
+- **On read (core reader)**: vectors are stored as string cells; the reader performs no automatic vector detection
+- **On read (tabular layer)**: callers may opt in to vector deserialization via column type overrides in `rowsFromSheet()`, or rely on automatic detection via `isVectorString()` in `inferSchema()`
+- **On read (SheetReader)**: `SheetReader.toObjects()` delegates to `rowsFromSheet()`, so callers may also opt in to vector deserialization via `options.columns`
 
 ## Shared Strings Integration
 

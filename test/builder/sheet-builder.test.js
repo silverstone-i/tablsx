@@ -2,6 +2,7 @@
 import { describe, it, expect } from "vitest";
 import { SheetBuilder } from "../../src/builder/sheet-builder.js";
 import { CellType } from "../../src/model/types.js";
+import { sheetFromRows } from "../../src/tabular/serializer.js";
 
 describe("SheetBuilder", () => {
   describe("addRow", () => {
@@ -177,6 +178,38 @@ describe("SheetBuilder", () => {
       // 1 header + 2 data rows
       expect(sheet.rows).toHaveLength(3);
       expect(sheet.rows[2][0].value).toBe(3);
+    });
+
+    it("should accept column type overrides for vectors", () => {
+      const sheet = new SheetBuilder("Test")
+        .addObjects([{ label: "item1", embedding: [0.1, 0.2, 0.3] }], {
+          columns: { embedding: { type: CellType.VECTOR } },
+        })
+        .build();
+
+      expect(sheet.rows[1][1].type).toBe(CellType.VECTOR);
+      expect(sheet.rows[1][1].value).toEqual([0.1, 0.2, 0.3]);
+    });
+
+    it("should accept column type overrides for dates from strings", () => {
+      const sheet = new SheetBuilder("Test")
+        .addObjects([{ event: "launch", date: "2024-06-15" }], {
+          columns: { date: { type: CellType.DATE } },
+        })
+        .build();
+
+      expect(sheet.rows[1][1].type).toBe(CellType.DATE);
+      expect(sheet.rows[1][1].value).toBeInstanceOf(Date);
+    });
+
+    it("should produce same output as sheetFromRows for identical input", () => {
+      const objects = [
+        { name: "Alice", age: 30, nested: { x: 1 } },
+        { name: "Bob", age: 25, nested: { x: 2 } },
+      ];
+      const fromBuilder = new SheetBuilder("Test").addObjects(objects).build();
+      const fromApi = sheetFromRows(objects, { name: "Test" });
+      expect(fromBuilder).toEqual(fromApi);
     });
   });
 
