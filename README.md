@@ -7,7 +7,7 @@ It is designed for data interchange, imports and exports, and programmatic workb
 ## Installation
 
 ```bash
-npm install tablsx
+npm install @nap-sft/tablsx
 ```
 
 ## Quick start
@@ -19,7 +19,7 @@ import {
   createWorksheet,
   readXlsx,
   writeXlsx,
-} from "tablsx";
+} from "@nap-sft/tablsx";
 
 const workbook = createWorkbook([
   createWorksheet("People", [
@@ -47,15 +47,16 @@ console.log(parsed.sheets[0].rows[1][0].value);
 
 ## Documentation
 
-- [Getting started](./docs/guide/getting-started.md)
-- [Choosing an API](./docs/guide/choosing-an-api.md)
-- [Reading workbooks](./docs/guide/reading-workbooks.md)
-- [Writing workbooks](./docs/guide/writing-workbooks.md)
-- [Tabular workflows](./docs/guide/tabular-workflows.md)
-- [Builder API](./docs/guide/builder-api.md)
-- [Reader API](./docs/guide/reader-api.md)
-- [API reference](./docs/reference/index.md)
-- [Documentation maintenance](./docs/documentation/docs-maintenance.md)
+Full documentation is available at **[silverstone-i.github.io/tablsx](https://silverstone-i.github.io/tablsx/)**.
+
+- [Getting started](https://silverstone-i.github.io/tablsx/guide/getting-started)
+- [Choosing an API](https://silverstone-i.github.io/tablsx/guide/choosing-an-api)
+- [Reading workbooks](https://silverstone-i.github.io/tablsx/guide/reading-workbooks)
+- [Writing workbooks](https://silverstone-i.github.io/tablsx/guide/writing-workbooks)
+- [Tabular workflows](https://silverstone-i.github.io/tablsx/guide/tabular-workflows)
+- [Builder API](https://silverstone-i.github.io/tablsx/guide/builder-api)
+- [Reader API](https://silverstone-i.github.io/tablsx/guide/reader-api)
+- [API reference](https://silverstone-i.github.io/tablsx/reference/)
 
 ## Development
 
