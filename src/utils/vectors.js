@@ -1,6 +1,7 @@
 // Copyright © 2026 – present NapSoft LLC. All rights reserved.
 /**
- * Serialize a number array to a JSON string.
+ * Serialize a numeric vector to the JSON string format used by `tablsx`.
+ *
  * @param {number[]} arr
  * @returns {string}
  */
@@ -12,7 +13,8 @@ export function serializeVector(arr) {
 }
 
 /**
- * Deserialize a JSON string to a number array.
+ * Deserialize a vector string into a numeric array.
+ *
  * @param {string} str
  * @returns {number[]}
  */
@@ -25,7 +27,8 @@ export function deserializeVector(str) {
 }
 
 /**
- * Check if a string looks like a JSON array of numbers.
+ * Check whether a string looks like a serialized numeric vector.
+ *
  * @param {string} str
  * @returns {boolean}
  */

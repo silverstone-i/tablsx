@@ -43,4 +43,5 @@ $RECYCLE.BIN/
 vitest.config.*.timestamp-*
 
 # Files and directories to ignore in the package
-docs/feature-list-vs-exceljs.md
+prd/feature-list-vs-exceljs.md
+docs/.vitepress/dist/

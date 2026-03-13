@@ -4,7 +4,7 @@ import { SheetBuilder } from "./sheet-builder.js";
 
 /**
  * Builder for constructing Workbook objects with a fluent API.
- * Wraps the internal data model — produces the same plain objects
+ * Wraps the internal data model and produces the same plain objects
  * used by the reader and writer.
  */
 export class WorkbookBuilder {
@@ -12,7 +12,8 @@ export class WorkbookBuilder {
   #sheets = new Map();
 
   /**
-   * Create a new WorkbookBuilder.
+   * Create a new builder instance.
+   *
    * @returns {WorkbookBuilder}
    */
   static create() {
@@ -22,6 +23,7 @@ export class WorkbookBuilder {
   /**
    * Get or create a SheetBuilder for the given sheet name.
    * If a sheet with this name already exists, the existing builder is returned.
+   *
    * @param {string} name
    * @returns {SheetBuilder}
    */
@@ -33,8 +35,9 @@ export class WorkbookBuilder {
   }
 
   /**
-   * Build the Workbook object from all sheets.
-   * @returns {{ sheets: Array<{ name: string, rows: Array<Array<object>> }> }}
+   * Build a normalized workbook object from the configured sheets.
+   *
+   * @returns {import("../model/workbook.js").Workbook}
    */
   build() {
     const sheets = [];

@@ -14,7 +14,7 @@ export class WorkbookReader {
   #sheetNames = [];
 
   /**
-   * @param {{ sheets: Array<{ name: string, rows: Array<Array<object>> }> }} workbook
+   * @param {import("../model/workbook.js").Workbook} workbook
    */
   constructor(workbook) {
     for (const ws of workbook.sheets) {
@@ -25,7 +25,8 @@ export class WorkbookReader {
   }
 
   /**
-   * Create a WorkbookReader from an .xlsx buffer.
+   * Create a reader from an `.xlsx` buffer.
+   *
    * @param {Buffer|Uint8Array} buffer
    * @returns {WorkbookReader}
    */
@@ -34,26 +35,34 @@ export class WorkbookReader {
   }
 
   /**
-   * Create a WorkbookReader from an existing Workbook object.
-   * @param {{ sheets: Array<{ name: string, rows: Array<Array<object>> }> }} workbook
+   * Wrap an existing normalized workbook object.
+   *
+   * @param {import("../model/workbook.js").Workbook} workbook
    * @returns {WorkbookReader}
    */
   static fromWorkbook(workbook) {
     return new WorkbookReader(workbook);
   }
 
-  /** @returns {string[]} */
+  /**
+   * Get sheet names in workbook order.
+   * @returns {string[]}
+   */
   get sheetNames() {
     return [...this.#sheetNames];
   }
 
-  /** @returns {number} */
+  /**
+   * Get the number of worksheets in the workbook.
+   * @returns {number}
+   */
   get sheetCount() {
     return this.#sheetNames.length;
   }
 
   /**
    * Get a SheetReader by name or zero-based index.
+   *
    * @param {string|number} nameOrIndex
    * @returns {SheetReader}
    */

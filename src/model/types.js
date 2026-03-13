@@ -1,5 +1,8 @@
 // Copyright © 2026 – present NapSoft LLC. All rights reserved.
-/** @enum {string} */
+/**
+ * Supported normalized cell types in the public workbook model.
+ * @enum {string}
+ */
 export const CellType = {
   STRING: "string",
   NUMBER: "number",
@@ -11,7 +14,8 @@ export const CellType = {
 };
 
 /**
- * Check if a value is a valid CellType.
+ * Check whether a string is a supported cell type.
+ *
  * @param {string} type
  * @returns {boolean}
  */
@@ -20,9 +24,15 @@ export function isCellType(type) {
 }
 
 /**
- * Infer the CellType from a JavaScript value.
+ * Infer a normalized cell type from a JavaScript value.
+ *
+ * Strings become `string`, finite numbers become `number`, booleans become
+ * `boolean`, `Date` instances become `date`, numeric arrays become `vector`,
+ * and nullish values become `empty`.
+ *
  * @param {*} value
  * @returns {string}
+ * @throws {Error} Thrown when a number is `NaN`, `Infinity`, or `-Infinity`.
  */
 export function inferType(value) {
   if (value === null || value === undefined) return CellType.EMPTY;

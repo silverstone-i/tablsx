@@ -1,7 +1,10 @@
 // Copyright © 2026 – present NapSoft LLC. All rights reserved.
 /**
- * Convert an Excel serial date number to a JavaScript Date (UTC).
- * Handles the Lotus 1-2-3 leap year bug (serial 60 = 1900-02-29 which doesn't exist).
+ * Convert an Excel serial date number to a JavaScript `Date` in UTC.
+ *
+ * This function compensates for Excel's 1900 leap-year bug and also supports
+ * fractional serials used for time-of-day values.
+ *
  * @param {number} serial
  * @returns {Date}
  */
@@ -28,7 +31,8 @@ export function excelDateToJS(serial) {
 }
 
 /**
- * Convert a JavaScript Date to an Excel serial date number.
+ * Convert a JavaScript `Date` to an Excel serial date number.
+ *
  * @param {Date} date
  * @returns {number}
  */

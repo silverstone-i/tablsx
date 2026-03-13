@@ -1,7 +1,8 @@
 // Copyright © 2026 – present NapSoft LLC. All rights reserved.
 /**
- * Convert a 0-indexed column number to a letter (A, B, ..., Z, AA, AB, ...).
- * @param {number} col - 0-indexed column number
+ * Convert a zero-based column number to an Excel column label.
+ *
+ * @param {number} col Zero-based column number.
  * @returns {string}
  */
 export function columnToLetter(col) {
@@ -15,8 +16,9 @@ export function columnToLetter(col) {
 }
 
 /**
- * Convert a column letter to a 0-indexed column number.
- * @param {string} letter - Column letter (e.g., "A", "AA")
+ * Convert an Excel column label to a zero-based column number.
+ *
+ * @param {string} letter Column label such as `A` or `AA`.
  * @returns {number}
  */
 export function letterToColumn(letter) {
@@ -28,9 +30,10 @@ export function letterToColumn(letter) {
 }
 
 /**
- * Encode a 0-indexed row and column to a cell reference (e.g., "A1").
- * @param {number} row - 0-indexed row
- * @param {number} col - 0-indexed column
+ * Encode zero-based row and column coordinates to an Excel cell reference.
+ *
+ * @param {number} row Zero-based row index.
+ * @param {number} col Zero-based column index.
  * @returns {string}
  */
 export function encodeCellRef(row, col) {
@@ -38,8 +41,9 @@ export function encodeCellRef(row, col) {
 }
 
 /**
- * Decode a cell reference (e.g., "A1") to 0-indexed row and column.
- * @param {string} ref - Cell reference
+ * Decode an Excel cell reference such as `A1` to zero-based coordinates.
+ *
+ * @param {string} ref Cell reference.
  * @returns {{ row: number, col: number }}
  */
 export function decodeCellRef(ref) {
