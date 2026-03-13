@@ -1,6 +1,7 @@
 // Copyright © 2026 – present NapSoft LLC. All rights reserved.
 import { createCell, normalizeRows } from "../model/workbook.js";
 import { CellType } from "../model/types.js";
+import { sheetFromRows } from "../tabular/serializer.js";
 
 /**
  * Builder for constructing Worksheet objects with a fluent API.
@@ -64,11 +65,16 @@ export class SheetBuilder {
    * Append rows from plain objects. On the first call, headers are derived
    * from the key union of all provided objects (unless setHeaders was called).
    * Subsequent calls match values to existing headers.
+   * Delegates to sheetFromRows() for column type overrides, vector
+   * serialization, date coercion, and nested-object handling.
    * @param {Object[]} objects
+   * @param {{ columns?: Record<string, { type: string }> }} [options]
    * @returns {this}
    */
-  addObjects(objects) {
+  addObjects(objects, options = {}) {
     if (objects.length === 0) return this;
+
+    const sheet = sheetFromRows(objects, { name: this.#name, ...options });
 
     if (!this.#headers) {
       if (this.#rows.length > 0) {
@@ -76,29 +82,17 @@ export class SheetBuilder {
           "Cannot derive headers from objects after rows have been added",
         );
       }
-      const columnSet = new Set();
-      for (const obj of objects) {
-        for (const key of Object.keys(obj)) {
-          columnSet.add(key);
-        }
-      }
-      this.#headers = [...columnSet];
+      this.#headers = sheet.rows[0].map((cell) => cell.value);
     }
 
-    for (const obj of objects) {
-      const row = this.#headers.map((header) => {
-        const value = obj[header];
-        if (value === null || value === undefined) {
-          return createCell(null, null, CellType.EMPTY);
-        }
-        if (
-          typeof value === "object" &&
-          !(value instanceof Date) &&
-          !Array.isArray(value)
-        ) {
-          return createCell(JSON.stringify(value));
-        }
-        return createCell(value);
+    // Map sheetFromRows columns to match existing header order
+    const srcHeaders = sheet.rows[0].map((cell) => cell.value);
+    for (let i = 1; i < sheet.rows.length; i++) {
+      const row = this.#headers.map((h) => {
+        const srcIdx = srcHeaders.indexOf(h);
+        return srcIdx >= 0
+          ? sheet.rows[i][srcIdx]
+          : createCell(null, null, CellType.EMPTY);
       });
       this.#rows.push(row);
     }

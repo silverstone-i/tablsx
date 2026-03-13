@@ -19,7 +19,7 @@ We adopt **thin wrapper classes** for both authoring and reading that wrap the e
 
 4. **Type inference reuse.** The builder relies on `createCell` → `inferType` for all value-to-cell conversion, ensuring identical type rules across the entire API surface.
 
-5. **`addObjects` mirrors `sheetFromRows` semantics.** Key union for headers, JSON.stringify for nested objects, empty cells for missing keys.
+5. **`addObjects` delegates to `sheetFromRows`.** Key union for headers, JSON.stringify for nested objects, empty cells for missing keys, column type overrides via `options.columns`.
 
 ### Reader classes (`WorkbookReader`, `SheetReader`)
 
@@ -27,7 +27,7 @@ We adopt **thin wrapper classes** for both authoring and reading that wrap the e
 
 2. **Multiple construction paths.** `WorkbookReader.fromBuffer(buffer)` parses an `.xlsx` file directly. `WorkbookReader.fromWorkbook(workbook)` wraps an existing plain-object workbook.
 
-3. **Value extraction shortcuts.** `SheetReader.toValues()` strips Cell metadata to return a plain `any[][]`. `SheetReader.toObjects()` treats the first row as headers and converts remaining rows to objects, mirroring the inverse of `SheetBuilder.addObjects()`.
+3. **Value extraction shortcuts.** `SheetReader.toValues()` strips Cell metadata to return a plain `any[][]`. `SheetReader.toObjects()` delegates to `rowsFromSheet()` for duplicate-header disambiguation, column type overrides (vector, date), and automatic vector deserialization.
 
 4. **Bounds-checked access.** `getRow(index)` and `getCell(row, col)` throw `RangeError` for out-of-bounds indices. `sheet(name)` throws for unknown sheet names.
 
@@ -39,7 +39,7 @@ We adopt **thin wrapper classes** for both authoring and reading that wrap the e
 
 **Merging builder into `sheetFromRows`:** `sheetFromRows` handles the object-to-sheet case well but doesn't cover raw row construction or incremental building.
 
-**Using `rowsFromSheet` instead of `SheetReader.toObjects()`:** `rowsFromSheet` supports column type overrides and vector/date deserialization, which `SheetReader.toObjects()` does not. The two serve different purposes — `toObjects()` is a quick convenience for simple cases, while `rowsFromSheet` handles advanced type coercion.
+**Using `rowsFromSheet` directly instead of `SheetReader.toObjects()`:** `toObjects()` now delegates to `rowsFromSheet()` internally, so both share the same capabilities — duplicate header disambiguation, column type overrides, and vector/date deserialization. The class method adds ergonomic sheet access; the standalone function works on plain objects.
 
 ## Consequences
 
@@ -47,4 +47,4 @@ We adopt **thin wrapper classes** for both authoring and reading that wrap the e
 - The convenience classes add no new data types or behaviors — they are purely ergonomic.
 - The internal data model remains unchanged and JSON-serializable.
 - Both the low-level (`createCell`/`createWorksheet`) and high-level (`WorkbookBuilder`/`WorkbookReader`) APIs coexist; users choose based on their needs.
-- `SheetReader.toObjects()` complements (not replaces) `rowsFromSheet` — the tabular layer remains the right choice when column type overrides or schema inference are needed.
+- `SheetReader.toObjects()` delegates to `rowsFromSheet()` and `SheetBuilder.addObjects()` delegates to `sheetFromRows()` — the classes are convenience wrappers over the tabular layer, not alternative implementations.

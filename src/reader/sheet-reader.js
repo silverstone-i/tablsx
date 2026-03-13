@@ -1,5 +1,6 @@
 // Copyright © 2026 – present NapSoft LLC. All rights reserved.
-import { CellType } from "../model/types.js";
+import { rowsFromSheet } from "../tabular/parser.js";
+import { createCell } from "../model/workbook.js";
 
 /**
  * Read-only wrapper around a parsed Worksheet, providing convenient
@@ -80,37 +81,20 @@ export class SheetReader {
 
   /**
    * Treat the first row as headers and convert remaining rows to objects.
-   * Mirrors the inverse of SheetBuilder.addObjects().
-   * @param {{ headers?: string[] }} [options]
+   * Delegates to rowsFromSheet() for duplicate-header disambiguation,
+   * column type overrides, vector deserialization, and date coercion.
+   * @param {{ headers?: string[], columns?: Record<string, { type: string }> }} [options]
    * @returns {Object[]}
    */
   toObjects(options = {}) {
-    const headers = options.headers ?? this.#headerStrings();
-    if (!headers) {
+    if (this.#rows.length === 0 && !options.headers) {
       throw new Error(
         "Cannot convert to objects: sheet has no rows to derive headers from",
       );
     }
-    const startRow = options.headers ? 0 : 1;
-    const result = [];
-    for (let i = startRow; i < this.#rows.length; i++) {
-      const obj = {};
-      for (let c = 0; c < headers.length; c++) {
-        const cell = this.#rows[i][c];
-        obj[headers[c]] =
-          cell && cell.type !== CellType.EMPTY ? cell.value : null;
-      }
-      result.push(obj);
-    }
-    return result;
-  }
-
-  /**
-   * Get the first row's values as strings (for use as headers).
-   * @returns {string[]|null}
-   */
-  #headerStrings() {
-    if (this.#rows.length === 0) return null;
-    return this.#rows[0].map((cell) => String(cell.value));
+    const rows = options.headers
+      ? [options.headers.map((h) => createCell(h)), ...this.#rows]
+      : this.#rows;
+    return rowsFromSheet({ name: this.#name, rows }, options);
   }
 }

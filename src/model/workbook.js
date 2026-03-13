@@ -29,18 +29,34 @@ export function createWorksheet(name, rows = []) {
   return { name, rows };
 }
 
+/** Characters that Excel forbids in sheet names. */
+const INVALID_SHEET_NAME_CHARS = /[[\]:*?/\\]/;
+
 /**
- * Validate that no two sheets share the same name.
+ * Validate sheet names for Excel compatibility.
+ * Checks for duplicates, length > 31, and invalid characters.
  * @param {Array<{ name: string }>} sheets
- * @throws {Error} if duplicate names are found
+ * @throws {Error} if any name is invalid
  */
 export function validateSheetNames(sheets) {
   const names = new Set();
   for (const sheet of sheets) {
-    if (names.has(sheet.name)) {
-      throw new Error(`Duplicate sheet name: "${sheet.name}"`);
+    const name = sheet.name;
+    if (names.has(name)) {
+      throw new Error(`Duplicate sheet name: "${name}"`);
     }
-    names.add(sheet.name);
+    if (name.length > 31) {
+      throw new Error(
+        `Sheet name "${name}" exceeds Excel's 31-character limit`,
+      );
+    }
+    const match = name.match(INVALID_SHEET_NAME_CHARS);
+    if (match) {
+      throw new Error(
+        `Sheet name "${name}" contains invalid character: "${match[0]}"`,
+      );
+    }
+    names.add(name);
   }
 }
 

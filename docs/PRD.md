@@ -556,7 +556,8 @@ class WorkbookBuilder {
 class SheetBuilder {
   addRow(values: any[])              // Append a row of raw values
   addRows(rows: any[][])             // Append multiple rows
-  addObjects(objects: object[])      // Append rows from objects (first call sets headers)
+  addObjects(objects: object[], options?: { columns?: Record<string, { type: string }> })
+                                     // Append rows from objects; delegates to sheetFromRows()
   setHeaders(headers: string[])      // Explicitly set column headers
   build()                            // → Worksheet (internal data model)
 }
@@ -626,7 +627,8 @@ class SheetReader {
   getRow(index: number)                         // → Cell[] (single row)
   getCell(row: number, col: number)             // → Cell (single cell)
   toValues()                                    // → any[][] (strip Cell metadata)
-  toObjects(options?: { headers?: string[] })   // → object[] (first row as keys)
+  toObjects(options?: { headers?: string[], columns?: Record<string, { type: string }> })
+                                                // → object[] (delegates to rowsFromSheet)
 }
 ```
 

@@ -38,10 +38,23 @@ export function parseWorksheet(xml, sharedStrings, dateStyles = new Set()) {
     const cells = xmlRow.c;
     if (!cells) continue;
 
+    // Track implicit column position for cells missing the r attribute.
+    // The row index comes from the row's r attribute (1-based) or from
+    // document order when the row also lacks an r attribute.
+    const rowRef = xmlRow["@_r"];
+    const implicitRow = rowRef ? Number(rowRef) - 1 : maxRow + 1;
+    let nextCol = 0;
+
     for (const cell of cells) {
       const ref = cell["@_r"];
-      if (!ref) continue;
-      const { row, col } = decodeCellRef(ref);
+      let row, col;
+      if (ref) {
+        ({ row, col } = decodeCellRef(ref));
+        nextCol = col + 1;
+      } else {
+        row = implicitRow;
+        col = nextCol++;
+      }
       maxRow = Math.max(maxRow, row);
       maxCol = Math.max(maxCol, col);
       cellData.push({ row, col, cell });

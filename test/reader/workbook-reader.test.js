@@ -4,6 +4,7 @@ import { WorkbookReader } from "../../src/reader/workbook-reader.js";
 import { SheetReader } from "../../src/reader/sheet-reader.js";
 import { WorkbookBuilder } from "../../src/builder/workbook-builder.js";
 import { writeXlsx } from "../../src/writer/index.js";
+import { CellType } from "../../src/model/types.js";
 
 function buildBuffer(fn) {
   const builder = WorkbookBuilder.create();
@@ -178,6 +179,38 @@ describe("SheetReader", () => {
       });
       const objs = sheet.toObjects();
       expect(objs[0].Value).toBeNull();
+    });
+
+    it("should disambiguate duplicate headers", () => {
+      const sheet = readerForSheet((s) => {
+        s.addRow(["Col", "Col", "Col"]);
+        s.addRow(["a", "b", "c"]);
+      });
+      const objs = sheet.toObjects();
+      expect(objs[0]).toEqual({ Col: "a", Col_2: "b", Col_3: "c" });
+    });
+
+    it("should accept column type overrides for vectors", () => {
+      const buf = buildBuffer((b) =>
+        b
+          .sheet("Test")
+          .addRow(["label", "embedding"])
+          .addRow(["item1", [0.1, 0.2, 0.3]]),
+      );
+      const sheet = WorkbookReader.fromBuffer(buf).sheet("Test");
+      const objs = sheet.toObjects({
+        columns: { embedding: { type: CellType.VECTOR } },
+      });
+      expect(objs[0].embedding).toEqual([0.1, 0.2, 0.3]);
+    });
+
+    it("should throw for empty sheet without custom headers", () => {
+      const buf = buildBuffer((b) => b.sheet("Test").addRow([]));
+      const reader = WorkbookReader.fromBuffer(buf);
+      const sheet = reader.sheet("Test");
+      expect(() => sheet.toObjects()).toThrow(
+        "Cannot convert to objects: sheet has no rows to derive headers from",
+      );
     });
   });
 });

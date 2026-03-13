@@ -49,6 +49,7 @@ Example: `[0.1, 0.2, 0.3]` → `"[0.1,0.2,0.3]"`
 - **On write**: automatic — `VECTOR` cells are detected by `inferType()` when the value is `number[]`
 - **On read (core reader)**: vectors are stored as string cells; the reader performs no automatic vector detection
 - **On read (tabular layer)**: callers may opt in to vector deserialization via column type overrides in `rowsFromSheet()`, or rely on automatic detection via `isVectorString()` in `inferSchema()`
+- **On read (SheetReader)**: `SheetReader.toObjects()` delegates to `rowsFromSheet()`, so callers may also opt in to vector deserialization via `options.columns`
 
 ## Shared Strings Integration
 
