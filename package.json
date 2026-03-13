@@ -1,6 +1,6 @@
 {
   "name": "@nap-sft/tablsx",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A Node.js library for reading and writing Excel .xlsx files",
   "type": "module",
   "main": "./src/index.js",

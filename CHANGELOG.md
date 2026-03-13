@@ -7,11 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-03-13
+
 ### Added
 
 - GitHub Actions workflow for automated npm publishing on version tags (with RC support)
 - GitHub Actions workflow for VitePress documentation deployment to GitHub Pages
 - Release Guide documenting versioning, branching, and publishing workflows
+- Homepage, repository, and bugs links in package.json for npm discoverability
+- Scoped package name to `@nap-sft/tablsx` with public access
 
 ## [0.1.0] - 2026-03-13
 
