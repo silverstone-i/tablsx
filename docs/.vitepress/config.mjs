@@ -3,6 +3,7 @@ import { defineConfig } from "vitepress";
 export default defineConfig({
   title: "tablsx",
   description: "Lightweight Node.js utilities for reading and writing .xlsx files.",
+  base: "/tablsx/",
   cleanUrls: true,
   themeConfig: {
     logo: { text: "tablsx" },
