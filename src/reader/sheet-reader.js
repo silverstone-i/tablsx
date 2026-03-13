@@ -14,35 +14,48 @@ export class SheetReader {
   #rows;
 
   /**
-   * @param {{ name: string, rows: Array<Array<object>> }} worksheet
+   * @param {import("../model/workbook.js").Worksheet} worksheet
    */
   constructor(worksheet) {
     this.#name = worksheet.name;
     this.#rows = worksheet.rows;
   }
 
-  /** @returns {string} */
+  /**
+   * Get the worksheet name.
+   * @returns {string}
+   */
   get name() {
     return this.#name;
   }
 
-  /** @returns {Array<Array<{ value: *, formula: string|null, type: string }>>} */
+  /**
+   * Get the normalized cell grid.
+   * @returns {Array<Array<{ value: *, formula: string|null, type: string }>>}
+   */
   get rows() {
     return this.#rows;
   }
 
-  /** @returns {number} */
+  /**
+   * Get the number of rows in the worksheet.
+   * @returns {number}
+   */
   get rowCount() {
     return this.#rows.length;
   }
 
-  /** @returns {number} */
+  /**
+   * Get the width of the worksheet after row normalization.
+   * @returns {number}
+   */
   get columnCount() {
     return this.#rows.length > 0 ? this.#rows[0].length : 0;
   }
 
   /**
    * Get a single row by zero-based index.
+   *
    * @param {number} index
    * @returns {Array<{ value: *, formula: string|null, type: string }>}
    */
@@ -57,6 +70,7 @@ export class SheetReader {
 
   /**
    * Get a single cell by zero-based row and column index.
+   *
    * @param {number} row
    * @param {number} col
    * @returns {{ value: *, formula: string|null, type: string }}
@@ -72,7 +86,8 @@ export class SheetReader {
   }
 
   /**
-   * Return all cell values as a 2D array (stripping Cell metadata).
+   * Return all cell values as a 2D array without cell metadata.
+   *
    * @returns {Array<Array<*>>}
    */
   toValues() {
@@ -83,6 +98,7 @@ export class SheetReader {
    * Treat the first row as headers and convert remaining rows to objects.
    * Delegates to rowsFromSheet() for duplicate-header disambiguation,
    * column type overrides, vector deserialization, and date coercion.
+   *
    * @param {{ headers?: string[], columns?: Record<string, { type: string }> }} [options]
    * @returns {Object[]}
    */

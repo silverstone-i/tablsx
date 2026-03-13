@@ -5,7 +5,7 @@ import { sheetFromRows } from "../tabular/serializer.js";
 
 /**
  * Builder for constructing Worksheet objects with a fluent API.
- * Wraps the internal data model — produces the same plain objects
+ * Wraps the internal data model and produces the same plain objects
  * used by the reader and writer.
  */
 export class SheetBuilder {
@@ -19,7 +19,7 @@ export class SheetBuilder {
   #rows = [];
 
   /**
-   * @param {string} name - worksheet name
+   * @param {string} name Worksheet name.
    */
   constructor(name) {
     this.#name = name;
@@ -27,6 +27,7 @@ export class SheetBuilder {
 
   /**
    * Explicitly set column headers. Must be called before adding any rows.
+   *
    * @param {string[]} headers
    * @returns {this}
    */
@@ -40,7 +41,8 @@ export class SheetBuilder {
 
   /**
    * Append a single row of raw JavaScript values.
-   * Each value is converted to a Cell via createCell (with automatic type inference).
+   * Each value is converted to a cell with automatic type inference.
+   *
    * @param {any[]} values
    * @returns {this}
    */
@@ -51,6 +53,7 @@ export class SheetBuilder {
 
   /**
    * Append multiple rows of raw JavaScript values.
+   *
    * @param {any[][]} rows
    * @returns {this}
    */
@@ -67,6 +70,7 @@ export class SheetBuilder {
    * Subsequent calls match values to existing headers.
    * Delegates to sheetFromRows() for column type overrides, vector
    * serialization, date coercion, and nested-object handling.
+   *
    * @param {Object[]} objects
    * @param {{ columns?: Record<string, { type: string }> }} [options]
    * @returns {this}
@@ -101,8 +105,9 @@ export class SheetBuilder {
   }
 
   /**
-   * Build the Worksheet object.
-   * @returns {{ name: string, rows: Array<Array<{ value: *, formula: string|null, type: string }>> }}
+   * Build a normalized worksheet object.
+   *
+   * @returns {import("../model/workbook.js").Worksheet}
    */
   build() {
     const allRows = [];

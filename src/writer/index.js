@@ -14,9 +14,11 @@ import { normalizeRows, validateSheetNames } from "../model/workbook.js";
 import { createZip } from "./zip.js";
 
 /**
- * Write a Workbook object to an .xlsx buffer.
- * @param {{ sheets: Array<{ name: string, rows: Array<Array<object>> }> }} workbook
+ * Write a normalized workbook object to an `.xlsx` buffer.
+ *
+ * @param {import("../model/workbook.js").Workbook} workbook
  * @returns {Uint8Array}
+ * @throws {Error} Thrown when sheet names or cell values are invalid for XLSX.
  */
 export function writeXlsx(workbook) {
   validateSheetNames(workbook.sheets);

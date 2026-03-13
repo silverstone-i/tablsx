@@ -1,37 +1,64 @@
 # tablsx
-tablsx is a lightweight Node.js library for importing and exporting Excel .xlsx files as structured JavaScript data.
 
-The library focuses on clean, predictable data interchange rather than full spreadsheet editing. It reads Excel workbooks into simple tabular structures and writes .xlsx files from arrays, objects, or database-style rows.
+`tablsx` is a lightweight ESM Node.js library for reading and writing Excel `.xlsx` files as predictable JavaScript data.
 
-Key capabilities:
-- Read .xlsx files into JavaScript data structures
-- Write .xlsx files from tabular data
-- Support Excel data types including strings, numbers, booleans, dates, formulas, and null values
-- Handle large datasets and multi-sheet workbooks
-- Support vector/embedding columns using numeric arrays
-- Provide a simple core data model with an optional builder-style API for creating workbooks
+It is designed for data interchange, imports and exports, and programmatic workbook generation rather than full spreadsheet editing.
 
-tablsx is designed for data pipelines, database exports, and other data engineering workflows.
+## Installation
 
-## Possible future features
+```bash
+npm install tablsx
+```
 
-The current scope intentionally focuses on predictable tabular interchange. If needed, the following features could be added in future versions:
+## Quick start
 
-- Styling and formatting support (fonts, fills, borders, number formats, alignment)
-- Worksheet tables
-- Data validation rules
-- Named ranges / defined names
-- Cell comments and notes
-- Conditional formatting
-- Image embedding
-- Worksheet protection
-- Page setup and print options (including headers and footers)
-- Worksheet views (freeze/split panes)
-- CSV read/write API
-- Rich text and hyperlink-focused helpers
-- Merged-cell and outline/grouping convenience APIs
-- Streaming read/write APIs for very large workbooks
+```js
+import {
+  createCell,
+  createWorkbook,
+  createWorksheet,
+  readXlsx,
+  writeXlsx,
+} from "tablsx";
 
-## Collaboration best practices
+const workbook = createWorkbook([
+  createWorksheet("People", [
+    [createCell("name"), createCell("age")],
+    [createCell("Ada"), createCell(36)],
+    [createCell("Linus"), createCell(54)],
+  ]),
+]);
 
-See [docs/collaboration-best-practices.md](./docs/collaboration-best-practices.md) for contributor workflow, coding standards, testing expectations, and documentation update rules.
+const bytes = writeXlsx(workbook);
+const parsed = readXlsx(bytes);
+
+console.log(parsed.sheets[0].rows[1][0].value);
+// "Ada"
+```
+
+## Core capabilities
+
+- Read `.xlsx` workbooks into a normalized JavaScript model
+- Write `.xlsx` workbooks from normalized workbook objects
+- Convert row objects to worksheets with `sheetFromRows`
+- Convert worksheets back to row objects with `rowsFromSheet`
+- Build workbooks fluently with `WorkbookBuilder` and `SheetBuilder`
+- Work with strings, numbers, booleans, dates, formulas, empty cells, and numeric vectors
+
+## Documentation
+
+- [Getting started](./docs/guide/getting-started.md)
+- [Reading workbooks](./docs/guide/reading-workbooks.md)
+- [Writing workbooks](./docs/guide/writing-workbooks.md)
+- [Tabular workflows](./docs/guide/tabular-workflows.md)
+- [Builder API](./docs/guide/builder-api.md)
+- [API reference](./docs/reference/index.md)
+- [Documentation maintenance](./docs/documentation/docs-maintenance.md)
+
+## Development
+
+```bash
+npm test
+npm run lint
+npm run docs:dev
+```

@@ -1,4 +1,13 @@
 // Copyright © 2026 – present NapSoft LLC. All rights reserved.
+/**
+ * Public package entry point for `tablsx`.
+ *
+ * The package exposes a small normalized workbook model, direct read/write
+ * functions, tabular conversion helpers, builder APIs, and low-level utilities
+ * for dates, cell references, vectors, and XML escaping.
+ *
+ * @module tablsx
+ */
 export { readXlsx } from "./reader/index.js";
 export { writeXlsx } from "./writer/index.js";
 export {

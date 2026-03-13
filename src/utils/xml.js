@@ -1,6 +1,7 @@
 // Copyright © 2026 – present NapSoft LLC. All rights reserved.
 /**
- * Escape a string for use in XML content.
+ * Escape a string for safe inclusion in XML text content.
+ *
  * @param {string} str
  * @returns {string}
  */

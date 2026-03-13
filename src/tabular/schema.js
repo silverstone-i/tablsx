@@ -3,10 +3,12 @@ import { CellType } from "../model/types.js";
 import { isVectorString } from "../utils/vectors.js";
 
 /**
- * Analyze a worksheet and return column metadata.
- * The first row is treated as headers. All subsequent rows are examined
- * to determine the dominant type for each column.
- * @param {{ name: string, rows: Array<Array<{ value: *, type: string }>> }} sheet
+ * Infer basic schema metadata from a worksheet.
+ *
+ * The first row is treated as headers. Remaining rows are scanned to determine
+ * a dominant type per column and whether nulls are present.
+ *
+ * @param {import("../model/workbook.js").Worksheet} sheet
  * @returns {{ columns: Array<{ name: string, type: string, nullable: boolean }> }}
  */
 export function inferSchema(sheet) {

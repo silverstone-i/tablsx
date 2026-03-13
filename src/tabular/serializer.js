@@ -9,12 +9,15 @@ import { isVectorString, deserializeVector } from "../utils/vectors.js";
 import { excelDateToJS } from "../utils/dates.js";
 
 /**
- * Convert an array of plain objects into a Worksheet.
- * The key union of all objects becomes column headers (row 0).
- * Values are typed automatically via inferType, with optional overrides.
- * @param {Array<Object>} rows - array of plain objects
+ * Convert an array of plain objects into a worksheet.
+ *
+ * The union of object keys becomes the header row. Nested objects are encoded
+ * as JSON strings. You can override column typing for cases such as vectors or
+ * date coercion.
+ *
+ * @param {Array<Object>} rows Array of row objects.
  * @param {{ name?: string, columns?: Record<string, { type: string }> }} [options]
- * @returns {{ name: string, rows: Array<Array<{ value: *, formula: string|null, type: string }>> }}
+ * @returns {import("../model/workbook.js").Worksheet}
  */
 export function sheetFromRows(rows, options = {}) {
   const sheetName = options.name ?? "Sheet1";
@@ -66,10 +69,11 @@ export function sheetFromRows(rows, options = {}) {
 }
 
 /**
- * Apply a column type override to a value, coercing it to the specified type.
+ * Apply a column type override to a value before writing it into the workbook.
+ *
  * @param {*} value
  * @param {string} type
- * @returns {{ value: *, formula: string|null, type: string }}
+ * @returns {import("../model/workbook.js").Cell}
  */
 function applyOverride(value, type) {
   switch (type) {

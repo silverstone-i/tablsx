@@ -4,9 +4,12 @@ import { isVectorString, deserializeVector } from "../utils/vectors.js";
 import { excelDateToJS } from "../utils/dates.js";
 
 /**
- * Convert a Worksheet into an array of plain objects.
- * The first row is used as property keys.
- * @param {{ name: string, rows: Array<Array<{ value: *, formula: string|null, type: string }>> }} sheet
+ * Convert a worksheet into an array of plain objects.
+ *
+ * The first row is treated as headers. Duplicate header names are
+ * disambiguated with `_2`, `_3`, and so on.
+ *
+ * @param {import("../model/workbook.js").Worksheet} sheet
  * @param {{ columns?: Record<string, { type: string }> }} [options]
  * @returns {Array<Object>}
  */

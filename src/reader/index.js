@@ -12,9 +12,11 @@ import {
 } from "../model/workbook.js";
 
 /**
- * Read an .xlsx file from a Buffer/Uint8Array and return a Workbook object.
+ * Read an `.xlsx` file from a buffer and return a normalized workbook object.
+ *
  * @param {Buffer|Uint8Array} buffer
- * @returns {{ sheets: Array<{ name: string, rows: Array<Array<object>> }> }}
+ * @returns {import("../model/workbook.js").Workbook}
+ * @throws {Error} Thrown when required XLSX package parts are missing.
  */
 export function readXlsx(buffer) {
   const files = extractZip(buffer);

@@ -665,12 +665,12 @@ The builder and reader convenience classes must always operate on the same inter
 
 The project must maintain Architecture Decision Records documenting key design decisions. ADRs provide a historical record of significant choices and their rationale, enabling contributors to understand why the system works the way it does.
 
-**Location:** `docs/adr/`
+**Location:** `prd/adr/`
 
 **Format:** Each ADR is a numbered markdown file following a consistent template.
 
 ```
-docs/adr/
+prd/adr/
   0001-internal-data-model.md
   0002-shared-strings-strategy.md
   0003-zip-and-xml-library-selection.md
@@ -719,10 +719,10 @@ What becomes easier or more difficult as a result of this decision?
 
 The project must maintain explicit rules documentation describing the behavioral contracts of the library. Rules documentation ensures consistent behavior and serves as a reference for contributors and consumers.
 
-**Location:** `docs/rules/`
+**Location:** `prd/rules/`
 
 ```
-docs/rules/
+prd/rules/
   type-conversion.md
   date-handling.md
   vector-serialization.md
