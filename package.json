@@ -30,6 +30,14 @@
     "node": ">=18.0.0"
   },
   "license": "MIT",
+  "homepage": "https://silverstone-i.github.io/tablsx/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/silverstone-i/tablsx.git"
+  },
+  "bugs": {
+    "url": "https://github.com/silverstone-i/tablsx/issues"
+  },
   "publishConfig": {
     "access": "public"
   },
