@@ -15,7 +15,7 @@ hero:
 
 features:
   - title: Small public API
-    details: The package exposes a single normalized workbook model plus focused helpers for reading, writing, tabular conversion, and builders.
+    details: The package exposes a single normalized workbook model plus focused helpers for reading, writing, tabular conversion, builders, and readers.
   - title: Data pipeline friendly
     details: Work with arrays, row objects, dates, formulas, empty cells, and numeric vectors without adopting a spreadsheet UI abstraction.
   - title: Explicit behavior
@@ -29,7 +29,9 @@ features:
 ## Documentation map
 
 - Start with [Getting Started](/guide/getting-started) for installation and a first round-trip example.
+- Use [Choosing an API](/guide/choosing-an-api) to decide between plain functions, builders, and readers.
 - Use [Reading Workbooks](/guide/reading-workbooks) and [Writing Workbooks](/guide/writing-workbooks) for direct buffer-based APIs.
 - Use [Tabular Workflows](/guide/tabular-workflows) when your data starts as arrays of objects.
 - Use [Builder API](/guide/builder-api) for fluent workbook construction.
+- Use [Reader API](/guide/reader-api) for navigable, read-only access to parsed workbooks.
 - Use [Reference](/reference/) for the full exported surface.

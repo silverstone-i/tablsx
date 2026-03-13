@@ -1,6 +1,6 @@
 # API Reference
 
-This reference follows the public exports from [`src/index.js`](../../src/index.js).
+This reference follows the public exports from [`src/index.js`](https://github.com/silverstone-i/tablsx/blob/main/src/index.js).
 
 ## Modules
 

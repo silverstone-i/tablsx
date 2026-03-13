@@ -20,10 +20,12 @@ export default defineConfig({
           text: "Guide",
           items: [
             { text: "Getting Started", link: "/guide/getting-started" },
+            { text: "Choosing an API", link: "/guide/choosing-an-api" },
             { text: "Reading Workbooks", link: "/guide/reading-workbooks" },
             { text: "Writing Workbooks", link: "/guide/writing-workbooks" },
             { text: "Tabular Workflows", link: "/guide/tabular-workflows" },
             { text: "Builder API", link: "/guide/builder-api" },
+            { text: "Reader API", link: "/guide/reader-api" },
             {
               text: "Data Types and Limits",
               link: "/guide/data-types-and-limits",
@@ -48,6 +50,14 @@ export default defineConfig({
         {
           text: "Documentation",
           items: [
+            {
+              text: "Collaboration Best Practices",
+              link: "/collaboration-best-practices",
+            },
+            {
+              text: "Feature Management",
+              link: "/documentation/feature-management-framework",
+            },
             {
               text: "Professional Docs Plan",
               link: "/documentation/professional-documentation-plan",

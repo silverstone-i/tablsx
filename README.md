@@ -48,10 +48,12 @@ console.log(parsed.sheets[0].rows[1][0].value);
 ## Documentation
 
 - [Getting started](./docs/guide/getting-started.md)
+- [Choosing an API](./docs/guide/choosing-an-api.md)
 - [Reading workbooks](./docs/guide/reading-workbooks.md)
 - [Writing workbooks](./docs/guide/writing-workbooks.md)
 - [Tabular workflows](./docs/guide/tabular-workflows.md)
 - [Builder API](./docs/guide/builder-api.md)
+- [Reader API](./docs/guide/reader-api.md)
 - [API reference](./docs/reference/index.md)
 - [Documentation maintenance](./docs/documentation/docs-maintenance.md)
 

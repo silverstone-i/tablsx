@@ -1,10 +1,19 @@
 # Known Limitations
 
-Documents known limitations, unsupported features, and out-of-scope behaviors.
+Documents known limitations, unsupported features, and current out-of-scope
+behaviors.
 
-## Unsupported Excel Features
+## Feature Classification
 
-The following Excel features are explicitly out of scope and will not be supported:
+This document records features that are currently unsupported and treated as
+out of scope for the active product direction. It is not the place to track
+speculative future work. Plausible future additions belong in the PRD's
+deferred-candidate section.
+
+## Currently Out-of-Scope Excel Features
+
+The following Excel features are explicitly out of scope for the current
+roadmap and should be rejected unless product strategy changes:
 
 - Cell styling (fonts, colors, borders, cell formatting)
 - Charts and chart objects

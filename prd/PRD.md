@@ -46,7 +46,7 @@ The library is designed for **tabular data interchange between systems** — rea
 
 ---
 
-## 2. Goals and Non-Goals
+## 2. Goals, Scope, and Feature Triage
 
 ### Goals
 
@@ -57,9 +57,10 @@ The library is designed for **tabular data interchange between systems** — rea
 - Progressive API design: plain data structures first, convenience classes later
 - JSON-serializable internal model
 
-### Non-Goals
+### Currently Out of Scope
 
-The following are explicitly out of scope for all phases:
+The following are outside the current product scope. These items should be
+treated as rejected for the current roadmap unless product strategy changes:
 
 - Excel styling (fonts, colors, borders, cell formatting)
 - Charts and chart objects
@@ -73,6 +74,43 @@ The following are explicitly out of scope for all phases:
 - Data validation rules
 - Named ranges
 - Print layout and page setup
+
+### Deferred Feature Candidates
+
+The following are not part of the current scope, but may be reconsidered if
+developer demand is strong and the implementation can preserve the package's
+identity as a predictable XLSX data-interchange library:
+
+- CSV read/write API
+- Streaming read/write APIs for very large workbooks
+- Worksheet tables
+- Named ranges / defined names with a narrowly scoped API
+- Merged-cell convenience helpers
+- Hyperlink-focused helpers
+- Outline/grouping convenience helpers
+
+These are not commitments. They are candidates for future scope review.
+
+### Feature Request Triage Buckets
+
+Every incoming feature request must be classified into one of four buckets
+before implementation work begins:
+
+1. **In scope now** — fits the current product direction and may be planned or implemented.
+2. **Deferred candidate** — not in the current scope, but plausible later.
+3. **Out of scope by design** — conflicts with the product identity or current roadmap.
+4. **Needs strategy decision** — too broad or architecture-shaping to classify without an explicit product decision.
+
+### Feature Request Workflow
+
+Feature requests from contributors and users should be handled in this order:
+
+1. Capture the request with the problem statement, example use case, and why the current API is insufficient.
+2. Classify it using the four triage buckets above.
+3. If it is a deferred candidate or needs strategy decision, update the PRD before code is written.
+4. If it changes architecture or long-lived direction, add or update an ADR in `prd/adr/`.
+5. If it is accepted for implementation, add or update runtime behavior contracts in `prd/rules/`.
+6. Only update public VitePress docs after the feature exists or the public support statement changes.
 
 ---
 

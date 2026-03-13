@@ -31,12 +31,15 @@ Numeric arrays are supported as a `vector` type. They are serialized using JSON 
 
 Formula cells store both a `formula` string and a normalized `type`. The package focuses on representation and round-trip behavior, not formula evaluation. The internal rationale lives in `prd/adr/0006-formula-handling.md`.
 
-## Non-goals
+## Current Scope Boundaries
 
-`tablsx` is intentionally not a full spreadsheet editing engine. Current non-goals include:
+`tablsx` is intentionally not a full spreadsheet editing engine. The following
+feature classes are currently out of scope:
 
 - rich styling and formatting APIs
 - comments, images, and advanced worksheet layout controls
 - Excel UI features such as panes, validation rules, or conditional formatting
 
-The detailed internal limitations document lives in `prd/rules/limitations.md`.
+Some feature ideas remain under consideration for future scope review, but they
+are not currently supported. The internal feature classification lives in
+`prd/PRD.md` and `prd/rules/limitations.md`.
