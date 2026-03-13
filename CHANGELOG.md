@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-03-13
+
+### Changed
+
+- README documentation links now point to GitHub Pages docs site
+- Install command and import updated to scoped package name `@nap-sft/tablsx`
+
 ## [0.1.1] - 2026-03-13
 
 ### Added
