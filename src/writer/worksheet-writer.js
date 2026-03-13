@@ -46,6 +46,11 @@ export function generateWorksheetXml(sheet, sharedStringsMap) {
           );
         }
       } else if (cell.type === CellType.NUMBER) {
+        if (!Number.isFinite(cell.value)) {
+          throw new Error(
+            `Invalid NUMBER cell at ${ref}: value is ${cell.value}`,
+          );
+        }
         parts.push(`<c r="${ref}"><v>${cell.value}</v></c>`);
       } else if (cell.type === CellType.BOOLEAN) {
         parts.push(`<c r="${ref}" t="b"><v>${cell.value ? 1 : 0}</v></c>`);

@@ -91,10 +91,11 @@ export class SheetBuilder {
 
     // Map sheetFromRows columns to match existing header order
     const srcHeaders = sheet.rows[0].map((cell) => cell.value);
+    const srcIndexMap = new Map(srcHeaders.map((h, i) => [h, i]));
     for (let i = 1; i < sheet.rows.length; i++) {
       const row = this.#headers.map((h) => {
-        const srcIdx = srcHeaders.indexOf(h);
-        return srcIdx >= 0
+        const srcIdx = srcIndexMap.get(h);
+        return srcIdx !== undefined
           ? sheet.rows[i][srcIdx]
           : createCell(null, null, CellType.EMPTY);
       });

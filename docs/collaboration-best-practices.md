@@ -27,8 +27,8 @@ This guide defines how to collaborate effectively on `tablsx` while preserving c
 
 ## 3) Use ADRs and rules docs for behavior changes
 
-- If a change alters architecture or long-lived design decisions, add or update an ADR in `docs/adr/`.
-- If a change alters runtime behavior contracts, update the relevant rule doc in `docs/rules/`.
+- If a change alters architecture or long-lived design decisions, add or update an ADR in `prd/adr/`.
+- If a change alters runtime behavior contracts, update the relevant rule doc in `prd/rules/`.
 - Keep docs and code changes in the same PR when possible.
 
 ## 4) Testing expectations

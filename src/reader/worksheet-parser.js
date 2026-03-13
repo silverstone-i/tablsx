@@ -30,7 +30,7 @@ export function parseWorksheet(xml, sharedStrings, dateStyles = new Set()) {
   if (!xmlRows) return [];
 
   // First pass: determine dimensions
-  let maxRow = 0;
+  let maxRow = -1;
   let maxCol = 0;
   const cellData = [];
 
