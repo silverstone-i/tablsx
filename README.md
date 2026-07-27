@@ -1,6 +1,6 @@
 # tablsx
 
-`tablsx` is a lightweight ESM Node.js library for reading and writing Excel `.xlsx` files as predictable JavaScript data.
+`tablsx` is a lightweight ESM Node.js library for reading and writing Excel `.xlsx` files as predictable JavaScript data. It is written in TypeScript and ships full type definitions.
 
 It is designed for data interchange, imports and exports, and programmatic workbook generation rather than full spreadsheet editing.
 
