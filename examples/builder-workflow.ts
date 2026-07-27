@@ -1,7 +1,8 @@
 // Copyright © 2026 – present NapSoft LLC. All rights reserved.
 import { WorkbookBuilder, WorkbookReader, writeXlsx } from "../src/index.js";
+import type { Workbook } from "../src/index.js";
 
-export function createSummaryWorkbook() {
+export function createSummaryWorkbook(): Workbook {
   const builder = WorkbookBuilder.create();
 
   builder
@@ -18,6 +19,6 @@ export function createSummaryWorkbook() {
   return builder.build();
 }
 
-export function readSummaryWorkbook() {
+export function readSummaryWorkbook(): WorkbookReader {
   return WorkbookReader.fromBuffer(writeXlsx(createSummaryWorkbook()));
 }

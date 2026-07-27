@@ -5,8 +5,9 @@ import {
   rowsFromSheet,
   sheetFromRows,
 } from "../src/index.js";
+import type { RowObject, Schema, Worksheet } from "../src/index.js";
 
-export function createEmbeddingsSheet() {
+export function createEmbeddingsSheet(): Worksheet {
   return sheetFromRows(
     [
       {
@@ -32,7 +33,7 @@ export function createEmbeddingsSheet() {
   );
 }
 
-export function parseEmbeddingsSheet() {
+export function parseEmbeddingsSheet(): RowObject[] {
   const sheet = createEmbeddingsSheet();
   return rowsFromSheet(sheet, {
     columns: {
@@ -42,6 +43,6 @@ export function parseEmbeddingsSheet() {
   });
 }
 
-export function inferEmbeddingsSchema() {
+export function inferEmbeddingsSchema(): Schema {
   return inferSchema(createEmbeddingsSheet());
 }

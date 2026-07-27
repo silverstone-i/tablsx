@@ -6,8 +6,9 @@ import {
   readXlsx,
   writeXlsx,
 } from "../src/index.js";
+import type { Workbook } from "../src/index.js";
 
-export function createPeopleWorkbook() {
+export function createPeopleWorkbook(): Workbook {
   return createWorkbook([
     createWorksheet("People", [
       [createCell("name"), createCell("age"), createCell("active")],
@@ -17,6 +18,6 @@ export function createPeopleWorkbook() {
   ]);
 }
 
-export function roundTripPeopleWorkbook() {
+export function roundTripPeopleWorkbook(): Workbook {
   return readXlsx(writeXlsx(createPeopleWorkbook()));
 }
