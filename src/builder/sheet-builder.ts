@@ -1,7 +1,14 @@
 // Copyright © 2026 – present NapSoft LLC. All rights reserved.
 import { createCell, normalizeRows } from "../model/workbook.js";
 import { CellType } from "../model/types.js";
+import type { CellValue, Row, Worksheet } from "../model/types.js";
 import { sheetFromRows } from "../tabular/serializer.js";
+import type { SheetFromRowsOptions } from "../tabular/serializer.js";
+
+/**
+ * Options for {@link SheetBuilder.addObjects}.
+ */
+export type AddObjectsOptions = Omit<SheetFromRowsOptions, "name">;
 
 /**
  * Builder for constructing Worksheet objects with a fluent API.
@@ -9,29 +16,20 @@ import { sheetFromRows } from "../tabular/serializer.js";
  * used by the reader and writer.
  */
 export class SheetBuilder {
-  /** @type {string} */
-  #name;
+  #name: string;
+  #headers: string[] | null = null;
+  #rows: Row[] = [];
 
-  /** @type {string[]|null} */
-  #headers = null;
-
-  /** @type {Array<Array<{ value: *, formula: string|null, type: string }>>} */
-  #rows = [];
-
-  /**
-   * @param {string} name Worksheet name.
-   */
-  constructor(name) {
+  constructor(name: string) {
     this.#name = name;
   }
 
   /**
    * Explicitly set column headers. Must be called before adding any rows.
    *
-   * @param {string[]} headers
-   * @returns {this}
+   * @throws {Error} Thrown when rows have already been added.
    */
-  setHeaders(headers) {
+  setHeaders(headers: string[]): this {
     if (this.#rows.length > 0) {
       throw new Error("Cannot set headers after rows have been added");
     }
@@ -42,22 +40,16 @@ export class SheetBuilder {
   /**
    * Append a single row of raw JavaScript values.
    * Each value is converted to a cell with automatic type inference.
-   *
-   * @param {any[]} values
-   * @returns {this}
    */
-  addRow(values) {
+  addRow(values: CellValue[]): this {
     this.#rows.push(values.map((v) => createCell(v)));
     return this;
   }
 
   /**
    * Append multiple rows of raw JavaScript values.
-   *
-   * @param {any[][]} rows
-   * @returns {this}
    */
-  addRows(rows) {
+  addRows(rows: CellValue[][]): this {
     for (const row of rows) {
       this.addRow(row);
     }
@@ -71,33 +63,41 @@ export class SheetBuilder {
    * Delegates to sheetFromRows() for column type overrides, vector
    * serialization, date coercion, and nested-object handling.
    *
-   * @param {Object[]} objects
-   * @param {{ columns?: Record<string, { type: string }> }} [options]
-   * @returns {this}
+   * @throws {Error} Thrown when headers must be derived after rows were added.
    */
-  addObjects(objects, options = {}) {
+  addObjects(
+    objects: Record<string, unknown>[],
+    options: AddObjectsOptions = {},
+  ): this {
     if (objects.length === 0) return this;
 
     const sheet = sheetFromRows(objects, { name: this.#name, ...options });
 
-    if (!this.#headers) {
+    // sheetFromRows always emits a header row for a non-empty input.
+    const srcHeaderRow = sheet.rows[0];
+    if (!srcHeaderRow) return this;
+    const srcHeaders = srcHeaderRow.map((cell) => String(cell.value));
+
+    let headers = this.#headers;
+    if (!headers) {
       if (this.#rows.length > 0) {
         throw new Error(
           "Cannot derive headers from objects after rows have been added",
         );
       }
-      this.#headers = sheet.rows[0].map((cell) => cell.value);
+      headers = [...srcHeaders];
+      this.#headers = headers;
     }
 
     // Map sheetFromRows columns to match existing header order
-    const srcHeaders = sheet.rows[0].map((cell) => cell.value);
     const srcIndexMap = new Map(srcHeaders.map((h, i) => [h, i]));
     for (let i = 1; i < sheet.rows.length; i++) {
-      const row = this.#headers.map((h) => {
+      const srcRow = sheet.rows[i];
+      if (!srcRow) continue;
+      const row = headers.map((h) => {
         const srcIdx = srcIndexMap.get(h);
-        return srcIdx !== undefined
-          ? sheet.rows[i][srcIdx]
-          : createCell(null, null, CellType.EMPTY);
+        const cell = srcIdx !== undefined ? srcRow[srcIdx] : undefined;
+        return cell ?? createCell(null, null, CellType.EMPTY);
       });
       this.#rows.push(row);
     }
@@ -107,11 +107,9 @@ export class SheetBuilder {
 
   /**
    * Build a normalized worksheet object.
-   *
-   * @returns {import("../model/workbook.js").Worksheet}
    */
-  build() {
-    const allRows = [];
+  build(): Worksheet {
+    const allRows: Row[] = [];
 
     if (this.#headers) {
       allRows.push(this.#headers.map((h) => createCell(h)));

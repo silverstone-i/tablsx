@@ -26,7 +26,7 @@ export interface SheetFromRowsOptions {
  * date coercion.
  */
 export function sheetFromRows(
-  rows: Array<Record<string, unknown>>,
+  rows: Record<string, unknown>[],
   options: SheetFromRowsOptions = {},
 ): Worksheet {
   const sheetName = options.name ?? "Sheet1";

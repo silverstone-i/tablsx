@@ -1,5 +1,6 @@
 // Copyright © 2026 – present NapSoft LLC. All rights reserved.
 import { createWorkbook } from "../model/workbook.js";
+import type { Workbook, Worksheet } from "../model/types.js";
 import { SheetBuilder } from "./sheet-builder.js";
 
 /**
@@ -8,39 +9,33 @@ import { SheetBuilder } from "./sheet-builder.js";
  * used by the reader and writer.
  */
 export class WorkbookBuilder {
-  /** @type {Map<string, SheetBuilder>} */
-  #sheets = new Map();
+  #sheets = new Map<string, SheetBuilder>();
 
   /**
    * Create a new builder instance.
-   *
-   * @returns {WorkbookBuilder}
    */
-  static create() {
+  static create(): WorkbookBuilder {
     return new WorkbookBuilder();
   }
 
   /**
    * Get or create a SheetBuilder for the given sheet name.
    * If a sheet with this name already exists, the existing builder is returned.
-   *
-   * @param {string} name
-   * @returns {SheetBuilder}
    */
-  sheet(name) {
-    if (!this.#sheets.has(name)) {
-      this.#sheets.set(name, new SheetBuilder(name));
+  sheet(name: string): SheetBuilder {
+    let builder = this.#sheets.get(name);
+    if (!builder) {
+      builder = new SheetBuilder(name);
+      this.#sheets.set(name, builder);
     }
-    return this.#sheets.get(name);
+    return builder;
   }
 
   /**
    * Build a normalized workbook object from the configured sheets.
-   *
-   * @returns {import("../model/workbook.js").Workbook}
    */
-  build() {
-    const sheets = [];
+  build(): Workbook {
+    const sheets: Worksheet[] = [];
     for (const builder of this.#sheets.values()) {
       sheets.push(builder.build());
     }

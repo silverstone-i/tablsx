@@ -19,7 +19,7 @@ export function parseWorkbook(xml: string): SheetEntry[] {
   const parser = new XMLParser({
     ignoreAttributes: false,
     attributeNamePrefix: "@_",
-    isArray: (name) => name === "sheet",
+    isArray: (name): boolean => name === "sheet",
   });
 
   const parsed = parser.parse(xml) as XmlWorkbookDoc;
@@ -39,7 +39,7 @@ export function parseWorkbookRels(xml: string): Map<string, string> {
   const parser = new XMLParser({
     ignoreAttributes: false,
     attributeNamePrefix: "@_",
-    isArray: (name) => name === "Relationship",
+    isArray: (name): boolean => name === "Relationship",
   });
 
   const parsed = parser.parse(xml) as XmlRelsDoc;

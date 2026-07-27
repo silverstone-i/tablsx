@@ -49,7 +49,7 @@ export function encodeCellRef(row: number, col: number): string {
 export function decodeCellRef(ref: string): CellRef {
   const match = /^([A-Z]+)(\d+)$/.exec(ref);
   // Both capture groups are guaranteed by the regex when it matches.
-  if (!match || match[1] === undefined || match[2] === undefined) {
+  if (match?.[1] === undefined || match[2] === undefined) {
     throw new Error(`Invalid cell reference: ${ref}`);
   }
   return {

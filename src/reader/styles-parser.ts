@@ -35,7 +35,7 @@ export function parseDateStyles(xml: string | null): Set<number> {
   const parser = new XMLParser({
     ignoreAttributes: false,
     attributeNamePrefix: "@_",
-    isArray: (name) => name === "numFmt" || name === "xf",
+    isArray: (name): boolean => name === "numFmt" || name === "xf",
   });
 
   const parsed = parser.parse(xml) as XmlStylesDoc;
@@ -60,7 +60,7 @@ export function parseDateStyles(xml: string | null): Set<number> {
 
   for (let i = 0; i < xfs.length; i++) {
     const xf = xfs[i];
-    const numFmtId = Number(xf?.["@_numFmtId"] || 0);
+    const numFmtId = Number(xf?.["@_numFmtId"] ?? 0);
 
     if (BUILTIN_DATE_FORMAT_IDS.has(numFmtId)) {
       dateXfIndices.add(i);

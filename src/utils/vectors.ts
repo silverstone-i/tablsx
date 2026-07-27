@@ -22,7 +22,7 @@ export function deserializeVector(str: string): number[] {
   if (!Array.isArray(arr) || !arr.every((v) => typeof v === "number")) {
     throw new Error("Invalid vector string: not an array of numbers");
   }
-  return arr as number[];
+  return arr;
 }
 
 /**

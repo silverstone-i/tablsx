@@ -18,7 +18,9 @@ interface PositionedCell {
  * Extract the plain text from a parsed `<t>` value.
  */
 function textValue(val: XmlText | undefined): string {
-  return typeof val === "object" ? String(val["#text"] ?? "") : String(val ?? "");
+  return typeof val === "object"
+    ? String(val["#text"] ?? "")
+    : String(val ?? "");
 }
 
 /**
@@ -31,13 +33,13 @@ function textValue(val: XmlText | undefined): string {
 export function parseWorksheet(
   xml: string,
   sharedStrings: string[],
-  dateStyles: Set<number> = new Set(),
+  dateStyles = new Set<number>(),
 ): Row[] {
   const parser = new XMLParser({
     ignoreAttributes: false,
     attributeNamePrefix: "@_",
     textNodeName: "#text",
-    isArray: (name) => name === "row" || name === "c",
+    isArray: (name): boolean => name === "row" || name === "c",
     // Preserve leading/trailing whitespace in values
     trimValues: false,
   });

@@ -60,8 +60,7 @@ export class WorkbookReader {
    */
   sheet(nameOrIndex: SheetIdentifier): SheetReader {
     if (typeof nameOrIndex === "number") {
-      const name =
-        nameOrIndex >= 0 ? this.#sheetNames[nameOrIndex] : undefined;
+      const name = nameOrIndex >= 0 ? this.#sheetNames[nameOrIndex] : undefined;
       const reader = name === undefined ? undefined : this.#sheets.get(name);
       if (reader === undefined) {
         throw new RangeError(

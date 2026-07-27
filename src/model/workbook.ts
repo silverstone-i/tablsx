@@ -24,7 +24,9 @@ export function createCell(
       type = inferType(value);
     }
   }
-  return { value, formula: formula || null, type };
+  // An empty-string formula normalizes to null.
+  if (formula === "") formula = null;
+  return { value, formula, type };
 }
 
 /**
@@ -45,7 +47,7 @@ const INVALID_SHEET_NAME_CHARS = /[[\]:*?/\\]/;
  *
  * @throws {Error} Thrown when any worksheet name violates Excel constraints.
  */
-export function validateSheetNames(sheets: Array<{ name: string }>): void {
+export function validateSheetNames(sheets: { name: string }[]): void {
   const names = new Set<string>();
   for (const sheet of sheets) {
     const name = sheet.name;
@@ -57,7 +59,7 @@ export function validateSheetNames(sheets: Array<{ name: string }>): void {
         `Sheet name "${name}" exceeds Excel's 31-character limit`,
       );
     }
-    const match = name.match(INVALID_SHEET_NAME_CHARS);
+    const match = INVALID_SHEET_NAME_CHARS.exec(name);
     if (match) {
       throw new Error(
         `Sheet name "${name}" contains invalid character: "${match[0]}"`,

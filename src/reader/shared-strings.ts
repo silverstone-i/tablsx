@@ -6,7 +6,9 @@ import type { XmlSstDoc, XmlText } from "./xml-types.js";
  * Extract the plain text from a parsed `<t>` value.
  */
 function textValue(val: XmlText | undefined): string {
-  return typeof val === "object" ? String(val["#text"] ?? "") : String(val ?? "");
+  return typeof val === "object"
+    ? String(val["#text"] ?? "")
+    : String(val ?? "");
 }
 
 /**
@@ -19,7 +21,7 @@ export function parseSharedStrings(xml: string | null): string[] {
     ignoreAttributes: false,
     attributeNamePrefix: "@_",
     textNodeName: "#text",
-    isArray: (name) => name === "si" || name === "r" || name === "t",
+    isArray: (name): boolean => name === "si" || name === "r" || name === "t",
     trimValues: false,
   });
 
