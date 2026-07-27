@@ -1,96 +1,93 @@
 // Copyright © 2026 – present NapSoft LLC. All rights reserved.
 import { rowsFromSheet } from "../tabular/parser.js";
+import type { RowObject, RowsFromSheetOptions } from "../tabular/parser.js";
 import { createCell } from "../model/workbook.js";
+import type { Cell, CellValue, Row, Worksheet } from "../model/types.js";
+
+/**
+ * Options for {@link SheetReader.toObjects}.
+ */
+export interface SheetToObjectsOptions extends RowsFromSheetOptions {
+  /** Explicit headers to use instead of the sheet's first row. */
+  headers?: string[];
+}
 
 /**
  * Read-only wrapper around a parsed Worksheet, providing convenient
  * accessors for rows, values, and object conversion.
  */
 export class SheetReader {
-  /** @type {string} */
-  #name;
+  #name: string;
+  #rows: Row[];
 
-  /** @type {Array<Array<{ value: *, formula: string|null, type: string }>>} */
-  #rows;
-
-  /**
-   * @param {import("../model/workbook.js").Worksheet} worksheet
-   */
-  constructor(worksheet) {
+  constructor(worksheet: Worksheet) {
     this.#name = worksheet.name;
     this.#rows = worksheet.rows;
   }
 
   /**
    * Get the worksheet name.
-   * @returns {string}
    */
-  get name() {
+  get name(): string {
     return this.#name;
   }
 
   /**
    * Get the normalized cell grid.
-   * @returns {Array<Array<{ value: *, formula: string|null, type: string }>>}
    */
-  get rows() {
+  get rows(): Row[] {
     return this.#rows;
   }
 
   /**
    * Get the number of rows in the worksheet.
-   * @returns {number}
    */
-  get rowCount() {
+  get rowCount(): number {
     return this.#rows.length;
   }
 
   /**
    * Get the width of the worksheet after row normalization.
-   * @returns {number}
    */
-  get columnCount() {
-    return this.#rows.length > 0 ? this.#rows[0].length : 0;
+  get columnCount(): number {
+    return this.#rows[0]?.length ?? 0;
   }
 
   /**
    * Get a single row by zero-based index.
    *
-   * @param {number} index
-   * @returns {Array<{ value: *, formula: string|null, type: string }>}
+   * @throws {RangeError} Thrown when the index is out of bounds.
    */
-  getRow(index) {
-    if (index < 0 || index >= this.#rows.length) {
+  getRow(index: number): Row {
+    const row = index >= 0 ? this.#rows[index] : undefined;
+    if (row === undefined) {
       throw new RangeError(
         `Row index ${index} out of bounds (0..${this.#rows.length - 1})`,
       );
     }
-    return this.#rows[index];
+    return row;
   }
 
   /**
    * Get a single cell by zero-based row and column index.
    *
-   * @param {number} row
-   * @param {number} col
-   * @returns {{ value: *, formula: string|null, type: string }}
+   * @throws {RangeError} Thrown when either index is out of bounds.
    */
-  getCell(row, col) {
+  getCell(row: number, col: number): Cell {
     const r = this.getRow(row);
-    if (col < 0 || col >= r.length) {
+    const cell = col >= 0 ? r[col] : undefined;
+    if (cell === undefined) {
       throw new RangeError(
         `Column index ${col} out of bounds (0..${r.length - 1})`,
       );
     }
-    return r[col];
+    return cell;
   }
 
   /**
    * Return all cell values as a 2D array without cell metadata.
-   *
-   * @returns {Array<Array<*>>}
    */
-  toValues() {
+  toValues(): CellValue[][] {
     return this.#rows.map((row) => row.map((cell) => cell.value));
   }
 
@@ -98,11 +95,8 @@ export class SheetReader {
    * Treat the first row as headers and convert remaining rows to objects.
    * Delegates to rowsFromSheet() for duplicate-header disambiguation,
    * column type overrides, vector deserialization, and date coercion.
-   *
-   * @param {{ headers?: string[], columns?: Record<string, { type: string }> }} [options]
-   * @returns {Object[]}
    */
-  toObjects(options = {}) {
+  toObjects(options: SheetToObjectsOptions = {}): RowObject[] {
     if (this.#rows.length === 0 && !options.headers) {
       throw new Error(
         "Cannot convert to objects: sheet has no rows to derive headers from",

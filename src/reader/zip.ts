@@ -1,15 +1,16 @@
 // Copyright © 2026 – present NapSoft LLC. All rights reserved.
 import { unzipSync } from "fflate";
+import type { XlsxInput } from "../model/types.js";
 
 /**
  * Extract all files from a ZIP buffer.
- * @param {Buffer|Uint8Array} buffer
- * @returns {Map<string, Uint8Array>} Map of file path → file contents
+ *
+ * @returns Map of file path → file contents.
  */
-export function extractZip(buffer) {
+export function extractZip(buffer: XlsxInput): Map<string, Uint8Array> {
   const data = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
   const files = unzipSync(data);
-  const result = new Map();
+  const result = new Map<string, Uint8Array>();
   for (const [path, content] of Object.entries(files)) {
     result.set(path, content);
   }
@@ -18,11 +19,11 @@ export function extractZip(buffer) {
 
 /**
  * Read a file from the ZIP as a UTF-8 string.
- * @param {Map<string, Uint8Array>} files
- * @param {string} path
- * @returns {string|null}
  */
-export function readFileAsString(files, path) {
+export function readFileAsString(
+  files: Map<string, Uint8Array>,
+  path: string,
+): string | null {
   const data = files.get(path);
   if (!data) return null;
   return new TextDecoder().decode(data);

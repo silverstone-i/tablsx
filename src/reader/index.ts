@@ -10,15 +10,14 @@ import {
   createWorksheet,
   normalizeRows,
 } from "../model/workbook.js";
+import type { Workbook, Worksheet, XlsxInput } from "../model/types.js";
 
 /**
  * Read an `.xlsx` file from a buffer and return a normalized workbook object.
  *
- * @param {Buffer|Uint8Array} buffer
- * @returns {import("../model/workbook.js").Workbook}
  * @throws {Error} Thrown when required XLSX package parts are missing.
  */
-export function readXlsx(buffer) {
+export function readXlsx(buffer: XlsxInput): Workbook {
   const files = extractZip(buffer);
 
   // Validate required package parts
@@ -46,7 +45,7 @@ export function readXlsx(buffer) {
   const relsMap = parseWorkbookRels(relsXml);
 
   // Parse each worksheet
-  const sheets = [];
+  const sheets: Worksheet[] = [];
   for (const entry of sheetEntries) {
     const target = relsMap.get(entry.rId);
     if (!target) {

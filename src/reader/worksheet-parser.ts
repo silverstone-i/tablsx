@@ -2,17 +2,37 @@
 import { XMLParser } from "fast-xml-parser";
 import { createCell } from "../model/workbook.js";
 import { CellType } from "../model/types.js";
+import type { CellValue, Row } from "../model/types.js";
 import { decodeCellRef } from "../utils/cell-ref.js";
 import { excelDateToJS } from "../utils/dates.js";
+import type { XmlCell, XmlText, XmlWorksheetDoc } from "./xml-types.js";
+
+/** A parsed cell with its resolved grid position. */
+interface PositionedCell {
+  row: number;
+  col: number;
+  cell: XmlCell;
+}
+
+/**
+ * Extract the plain text from a parsed `<t>` value.
+ */
+function textValue(val: XmlText | undefined): string {
+  return typeof val === "object" ? String(val["#text"] ?? "") : String(val ?? "");
+}
 
 /**
  * Parse a worksheet XML and return a 2D array of Cell objects.
- * @param {string} xml - The worksheet XML string
- * @param {string[]} sharedStrings - The shared strings table
- * @param {Set<number>} [dateStyles] - Set of xf indices that are date-formatted
- * @returns {Array<Array<object>>}
+ *
+ * @param xml The worksheet XML string.
+ * @param sharedStrings The shared strings table.
+ * @param dateStyles Set of xf indices that are date-formatted.
  */
-export function parseWorksheet(xml, sharedStrings, dateStyles = new Set()) {
+export function parseWorksheet(
+  xml: string,
+  sharedStrings: string[],
+  dateStyles: Set<number> = new Set(),
+): Row[] {
   const parser = new XMLParser({
     ignoreAttributes: false,
     attributeNamePrefix: "@_",
@@ -22,7 +42,7 @@ export function parseWorksheet(xml, sharedStrings, dateStyles = new Set()) {
     trimValues: false,
   });
 
-  const parsed = parser.parse(xml);
+  const parsed = parser.parse(xml) as XmlWorksheetDoc;
   const sheetData = parsed?.worksheet?.sheetData;
   if (!sheetData) return [];
 
@@ -32,7 +52,7 @@ export function parseWorksheet(xml, sharedStrings, dateStyles = new Set()) {
   // First pass: determine dimensions
   let maxRow = -1;
   let maxCol = 0;
-  const cellData = [];
+  const cellData: PositionedCell[] = [];
 
   for (const xmlRow of xmlRows) {
     const cells = xmlRow.c;
@@ -47,7 +67,7 @@ export function parseWorksheet(xml, sharedStrings, dateStyles = new Set()) {
 
     for (const cell of cells) {
       const ref = cell["@_r"];
-      let row, col;
+      let row: number, col: number;
       if (ref) {
         ({ row, col } = decodeCellRef(ref));
         nextCol = col + 1;
@@ -79,15 +99,16 @@ export function parseWorksheet(xml, sharedStrings, dateStyles = new Set()) {
     maxRow = sortedRows.length - 1;
     maxCol = sortedCols.length - 1;
     for (const d of cellData) {
-      d.row = rowMap.get(d.row);
-      d.col = colMap.get(d.col);
+      // Every d.row/d.col was collected into the maps above.
+      d.row = rowMap.get(d.row)!;
+      d.col = colMap.get(d.col)!;
     }
   }
 
   // Build the 2D array
-  const rows = [];
+  const rows: Row[] = [];
   for (let r = 0; r <= maxRow; r++) {
-    const row = [];
+    const row: Row = [];
     for (let c = 0; c <= maxCol; c++) {
       row.push(createCell(null, null, CellType.EMPTY));
     }
@@ -101,13 +122,18 @@ export function parseWorksheet(xml, sharedStrings, dateStyles = new Set()) {
     const v = cell.v;
     const f = cell.f;
 
-    let value = null;
-    let formula = null;
-    let type = CellType.EMPTY;
+    let value: CellValue = null;
+    let formula: string | null = null;
+    let type: CellType = CellType.EMPTY;
 
     // Handle formula
     if (f !== undefined) {
-      formula = typeof f === "object" ? (f["#text"] ?? null) : String(f);
+      if (typeof f === "object") {
+        const text = f["#text"];
+        formula = text === undefined ? null : String(text);
+      } else {
+        formula = String(f);
+      }
       // Formula can be an empty string for shared formulas, etc.
       if (formula === "") formula = null;
     }
@@ -121,21 +147,14 @@ export function parseWorksheet(xml, sharedStrings, dateStyles = new Set()) {
       // Inline string
       const is = cell.is;
       if (is?.t !== undefined) {
-        const tVal = Array.isArray(is.t) ? is.t[0] : is.t;
-        value =
-          typeof tVal === "object"
-            ? String(tVal["#text"] ?? "")
-            : String(tVal ?? "");
+        value = textValue(Array.isArray(is.t) ? is.t[0] : is.t);
       } else if (is?.r) {
         const runs = Array.isArray(is.r) ? is.r : [is.r];
-        value = "";
+        let text = "";
         for (const run of runs) {
-          const tVal = Array.isArray(run.t) ? run.t[0] : run.t;
-          value +=
-            typeof tVal === "object"
-              ? String(tVal["#text"] ?? "")
-              : String(tVal ?? "");
+          text += textValue(Array.isArray(run.t) ? run.t[0] : run.t);
         }
+        value = text;
       } else {
         value = "";
       }
@@ -181,7 +200,8 @@ export function parseWorksheet(xml, sharedStrings, dateStyles = new Set()) {
       type = CellType.EMPTY;
     }
 
-    rows[row][col] = createCell(value, formula, type);
+    // The dense grid spans every collected row/col index.
+    rows[row]![col] = createCell(value, formula, type);
   }
 
   return rows;

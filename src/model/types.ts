@@ -60,8 +60,10 @@ export interface Workbook {
 
 /**
  * Binary .xlsx input accepted by the readers.
+ *
+ * Node `Buffer` values are accepted as `Uint8Array` subclasses.
  */
-export type XlsxInput = Uint8Array;
+export type XlsxInput = Uint8Array | ArrayBuffer;
 
 /**
  * Check whether a string is a supported cell type.
