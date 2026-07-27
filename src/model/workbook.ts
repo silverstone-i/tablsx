@@ -1,26 +1,6 @@
 // Copyright © 2026 – present NapSoft LLC. All rights reserved.
 import { CellType, inferType } from "./types.js";
-
-/**
- * A normalized cell in the `tablsx` workbook model.
- * @typedef {object} Cell
- * @property {*} value Raw JavaScript value for the cell.
- * @property {string|null} formula Excel formula without a leading `=`, or `null`.
- * @property {string} type Normalized cell type from {@link CellType}.
- */
-
-/**
- * A worksheet in the `tablsx` workbook model.
- * @typedef {object} Worksheet
- * @property {string} name Excel-visible worksheet name.
- * @property {Array<Array<Cell>>} rows Rectangular row-major cell data.
- */
-
-/**
- * A workbook in the `tablsx` workbook model.
- * @typedef {object} Workbook
- * @property {Array<Worksheet>} sheets Worksheets in workbook order.
- */
+import type { Cell, CellValue, Row, Workbook, Worksheet } from "./types.js";
 
 /**
  * Create a normalized cell object.
@@ -28,12 +8,15 @@ import { CellType, inferType } from "./types.js";
  * If `type` is omitted, the function infers it from `value`. When `formula`
  * is provided without an explicit type, the cell type becomes `formula`.
  *
- * @param {*} [value=null] Raw JavaScript value to store in the cell.
- * @param {string|null} [formula=null] Excel formula text without a leading `=`.
- * @param {string} [type] Explicit cell type from {@link CellType}.
- * @returns {Cell}
+ * @param value Raw JavaScript value to store in the cell.
+ * @param formula Excel formula text without a leading `=`.
+ * @param type Explicit cell type from {@link CellType}.
  */
-export function createCell(value = null, formula = null, type) {
+export function createCell(
+  value: CellValue = null,
+  formula: string | null = null,
+  type?: CellType,
+): Cell {
   if (!type) {
     if (formula) {
       type = CellType.FORMULA;
@@ -46,12 +29,8 @@ export function createCell(value = null, formula = null, type) {
 
 /**
  * Create a worksheet object.
- *
- * @param {string} name
- * @param {Array<Array<Cell>>} [rows=[]]
- * @returns {Worksheet}
  */
-export function createWorksheet(name, rows = []) {
+export function createWorksheet(name: string, rows: Row[] = []): Worksheet {
   return { name, rows };
 }
 
@@ -64,11 +43,10 @@ const INVALID_SHEET_NAME_CHARS = /[[\]:*?/\\]/;
  * Checks for duplicate names, names longer than 31 characters, and invalid
  * characters forbidden by Excel.
  *
- * @param {Array<{ name: string }>} sheets Worksheets to validate.
  * @throws {Error} Thrown when any worksheet name violates Excel constraints.
  */
-export function validateSheetNames(sheets) {
-  const names = new Set();
+export function validateSheetNames(sheets: Array<{ name: string }>): void {
+  const names = new Set<string>();
   for (const sheet of sheets) {
     const name = sheet.name;
     if (names.has(name)) {
@@ -91,11 +69,8 @@ export function validateSheetNames(sheets) {
 
 /**
  * Create a workbook object and validate sheet naming rules.
- *
- * @param {Array<Worksheet>} [sheets=[]]
- * @returns {Workbook}
  */
-export function createWorkbook(sheets = []) {
+export function createWorkbook(sheets: Worksheet[] = []): Workbook {
   validateSheetNames(sheets);
   return { sheets };
 }
@@ -105,11 +80,8 @@ export function createWorkbook(sheets = []) {
  *
  * Short rows are padded with empty cells so every row has the same column
  * count. Existing cell objects are preserved.
- *
- * @param {Array<Array<Cell>>} rows
- * @returns {Array<Array<Cell>>}
  */
-export function normalizeRows(rows) {
+export function normalizeRows(rows: Row[]): Row[] {
   if (rows.length === 0) return rows;
   const maxCols = Math.max(...rows.map((r) => r.length));
   return rows.map((row) => {

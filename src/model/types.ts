@@ -1,7 +1,7 @@
 // Copyright © 2026 – present NapSoft LLC. All rights reserved.
+
 /**
  * Supported normalized cell types in the public workbook model.
- * @enum {string}
  */
 export const CellType = {
   STRING: "string",
@@ -11,16 +11,63 @@ export const CellType = {
   EMPTY: "empty",
   FORMULA: "formula",
   VECTOR: "vector",
-};
+} as const;
+
+/**
+ * Union of the normalized cell type strings.
+ */
+export type CellType = (typeof CellType)[keyof typeof CellType];
+
+/**
+ * Raw JavaScript values representable in a cell.
+ */
+export type CellValue = string | number | boolean | Date | number[] | null;
+
+/**
+ * A normalized cell in the `tablsx` workbook model.
+ */
+export interface Cell {
+  /** Raw JavaScript value for the cell. */
+  value: CellValue;
+  /** Excel formula without a leading `=`, or `null`. */
+  formula: string | null;
+  /** Normalized cell type from {@link CellType}. */
+  type: CellType;
+}
+
+/**
+ * A single row of cells in row-major sheet data.
+ */
+export type Row = Cell[];
+
+/**
+ * A worksheet in the `tablsx` workbook model.
+ */
+export interface Worksheet {
+  /** Excel-visible worksheet name. */
+  name: string;
+  /** Rectangular row-major cell data. */
+  rows: Row[];
+}
+
+/**
+ * A workbook in the `tablsx` workbook model.
+ */
+export interface Workbook {
+  /** Worksheets in workbook order. */
+  sheets: Worksheet[];
+}
+
+/**
+ * Binary .xlsx input accepted by the readers.
+ */
+export type XlsxInput = Uint8Array;
 
 /**
  * Check whether a string is a supported cell type.
- *
- * @param {string} type
- * @returns {boolean}
  */
-export function isCellType(type) {
-  return Object.values(CellType).includes(type);
+export function isCellType(type: string): type is CellType {
+  return (Object.values(CellType) as string[]).includes(type);
 }
 
 /**
@@ -30,11 +77,9 @@ export function isCellType(type) {
  * `boolean`, `Date` instances become `date`, numeric arrays become `vector`,
  * and nullish values become `empty`.
  *
- * @param {*} value
- * @returns {string}
  * @throws {Error} Thrown when a number is `NaN`, `Infinity`, or `-Infinity`.
  */
-export function inferType(value) {
+export function inferType(value: unknown): CellType {
   if (value === null || value === undefined) return CellType.EMPTY;
   if (typeof value === "string") return CellType.STRING;
   if (typeof value === "number") {
