@@ -1,4 +1,5 @@
 // Copyright © 2026 – present NapSoft LLC. All rights reserved.
+
 /**
  * Style index for date-formatted cells (xf index 1 with numFmtId 14 = "m/d/yyyy").
  */
@@ -7,9 +8,8 @@ export const DATE_STYLE_INDEX = 1;
 /**
  * Generate a minimal xl/styles.xml.
  * Includes a default xf (index 0) and a date xf (index 1, numFmtId 14).
- * @returns {string}
  */
-export function generateStylesXml() {
+export function generateStylesXml(): string {
   return [
     '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
     '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">',

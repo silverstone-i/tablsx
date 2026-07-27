@@ -2,17 +2,22 @@
 import { encodeCellRef } from "../utils/cell-ref.js";
 import { escapeXml } from "../utils/xml.js";
 import { CellType } from "../model/types.js";
+import type { Worksheet } from "../model/types.js";
 import { jsDateToExcel } from "../utils/dates.js";
 import { serializeVector } from "../utils/vectors.js";
 import { DATE_STYLE_INDEX } from "./styles-writer.js";
 
 /**
  * Generate xl/worksheets/sheetN.xml content.
- * @param {{ rows: Array<Array<{ value: *, formula: string|null, type: string }>> }} sheet
- * @param {Map<string, number>} sharedStringsMap
- * @returns {string}
+ *
+ * @param sheet Worksheet (only `rows` is consumed).
+ * @param sharedStringsMap String → shared-string index.
+ * @throws {Error} Thrown when a cell value is invalid for its cell type.
  */
-export function generateWorksheetXml(sheet, sharedStringsMap) {
+export function generateWorksheetXml(
+  sheet: Pick<Worksheet, "rows">,
+  sharedStringsMap: Map<string, number>,
+): string {
   const parts = [
     '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
     '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">',
@@ -21,10 +26,12 @@ export function generateWorksheetXml(sheet, sharedStringsMap) {
 
   for (let r = 0; r < sheet.rows.length; r++) {
     const row = sheet.rows[r];
+    if (!row) continue;
     parts.push(`<row r="${r + 1}">`);
 
     for (let c = 0; c < row.length; c++) {
       const cell = row[c];
+      if (!cell) continue;
       const ref = encodeCellRef(r, c);
 
       if (cell.type === CellType.EMPTY) {
@@ -46,9 +53,9 @@ export function generateWorksheetXml(sheet, sharedStringsMap) {
           );
         }
       } else if (cell.type === CellType.NUMBER) {
-        if (!Number.isFinite(cell.value)) {
+        if (typeof cell.value !== "number" || !Number.isFinite(cell.value)) {
           throw new Error(
-            `Invalid NUMBER cell at ${ref}: value is ${cell.value}`,
+            `Invalid NUMBER cell at ${ref}: value is ${String(cell.value)}`,
           );
         }
         parts.push(`<c r="${ref}"><v>${cell.value}</v></c>`);
@@ -102,7 +109,7 @@ export function generateWorksheetXml(sheet, sharedStringsMap) {
         cellXml += "</c>";
         parts.push(cellXml);
       } else {
-        throw new Error(`Unsupported cell type: ${cell.type}`);
+        throw new Error(`Unsupported cell type: ${String(cell.type)}`);
       }
     }
 

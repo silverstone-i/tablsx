@@ -1,11 +1,12 @@
 // Copyright © 2026 – present NapSoft LLC. All rights reserved.
+
 /**
  * Generate [Content_Types].xml content.
- * @param {number} sheetCount
- * @param {boolean} hasSharedStrings
- * @returns {string}
  */
-export function generateContentTypes(sheetCount, hasSharedStrings) {
+export function generateContentTypes(
+  sheetCount: number,
+  hasSharedStrings: boolean,
+): string {
   const parts = [
     '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
     '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">',

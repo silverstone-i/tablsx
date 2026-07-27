@@ -3,12 +3,12 @@ import { zipSync } from "fflate";
 
 /**
  * Package files into a ZIP buffer.
- * @param {Map<string, string>} files - Map of file path → XML string content
- * @returns {Uint8Array}
+ *
+ * @param files Map of file path → XML string content.
  */
-export function createZip(files) {
+export function createZip(files: Map<string, string>): Uint8Array {
   const encoder = new TextEncoder();
-  const zipData = {};
+  const zipData: Record<string, Uint8Array> = {};
 
   for (const [path, content] of files) {
     zipData[path] = encoder.encode(content);

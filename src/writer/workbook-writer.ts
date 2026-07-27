@@ -3,21 +3,19 @@ import { escapeXml } from "../utils/xml.js";
 
 /**
  * Generate xl/workbook.xml content.
- * @param {Array<{ name: string }>} sheets
- * @returns {string}
  */
-export function generateWorkbookXml(sheets) {
+export function generateWorkbookXml(sheets: Array<{ name: string }>): string {
   const parts = [
     '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
     '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">',
     "<sheets>",
   ];
 
-  for (let i = 0; i < sheets.length; i++) {
+  sheets.forEach((sheet, i) => {
     parts.push(
-      `<sheet name="${escapeXml(sheets[i].name)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`,
+      `<sheet name="${escapeXml(sheet.name)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`,
     );
-  }
+  });
 
   parts.push("</sheets>");
   parts.push("</workbook>");
@@ -26,11 +24,11 @@ export function generateWorkbookXml(sheets) {
 
 /**
  * Generate xl/_rels/workbook.xml.rels content.
- * @param {number} sheetCount
- * @param {boolean} hasSharedStrings
- * @returns {string}
  */
-export function generateWorkbookRels(sheetCount, hasSharedStrings) {
+export function generateWorkbookRels(
+  sheetCount: number,
+  hasSharedStrings: boolean,
+): string {
   const parts = [
     '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
     '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">',

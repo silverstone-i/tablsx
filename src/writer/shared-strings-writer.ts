@@ -1,22 +1,31 @@
 // Copyright © 2026 – present NapSoft LLC. All rights reserved.
 import { escapeXml } from "../utils/xml.js";
 import { CellType } from "../model/types.js";
+import type { Workbook } from "../model/types.js";
 import { serializeVector } from "../utils/vectors.js";
+
+/**
+ * A deduplicated shared strings table.
+ */
+export interface SharedStringsTable {
+  /** String → index into `strings`. */
+  map: Map<string, number>;
+  /** Unique strings in insertion order. */
+  strings: string[];
+}
 
 /**
  * Build a deduplicated shared strings table from a workbook.
  * Collects STRING and VECTOR cells (vectors are serialized as JSON strings).
- * @param {{ sheets: Array<{ rows: Array<Array<{ value: *, type: string }>> }> }} workbook
- * @returns {{ map: Map<string, number>, strings: string[] }}
  */
-export function buildSharedStrings(workbook) {
-  const map = new Map();
-  const strings = [];
+export function buildSharedStrings(workbook: Workbook): SharedStringsTable {
+  const map = new Map<string, number>();
+  const strings: string[] = [];
 
   for (const sheet of workbook.sheets) {
     for (const row of sheet.rows) {
       for (const cell of row) {
-        let str;
+        let str: string | undefined;
         if (cell.type === CellType.STRING && cell.value !== null) {
           str = String(cell.value);
         } else if (cell.type === CellType.VECTOR && cell.value !== null) {
@@ -37,10 +46,8 @@ export function buildSharedStrings(workbook) {
 
 /**
  * Generate xl/sharedStrings.xml content.
- * @param {string[]} strings
- * @returns {string}
  */
-export function generateSharedStringsXml(strings) {
+export function generateSharedStringsXml(strings: string[]): string {
   const parts = [
     '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
     `<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" uniqueCount="${strings.length}">`,

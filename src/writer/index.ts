@@ -11,20 +11,19 @@ import {
 import { generateContentTypes } from "./content-types.js";
 import { generateStylesXml } from "./styles-writer.js";
 import { normalizeRows, validateSheetNames } from "../model/workbook.js";
+import type { Workbook } from "../model/types.js";
 import { createZip } from "./zip.js";
 
 /**
  * Write a normalized workbook object to an `.xlsx` buffer.
  *
- * @param {import("../model/workbook.js").Workbook} workbook
- * @returns {Uint8Array}
  * @throws {Error} Thrown when sheet names or cell values are invalid for XLSX.
  */
-export function writeXlsx(workbook) {
+export function writeXlsx(workbook: Workbook): Uint8Array {
   validateSheetNames(workbook.sheets);
 
   // Enforce row-length consistency before writing
-  const normalizedWorkbook = {
+  const normalizedWorkbook: Workbook = {
     sheets: workbook.sheets.map((sheet) => ({
       name: sheet.name,
       rows: normalizeRows(sheet.rows),
@@ -37,7 +36,7 @@ export function writeXlsx(workbook) {
   const hasSharedStrings = strings.length > 0;
 
   // Generate XML files
-  const files = new Map();
+  const files = new Map<string, string>();
 
   // Root relationships
   files.set(
@@ -72,12 +71,12 @@ export function writeXlsx(workbook) {
   }
 
   // Worksheets
-  for (let i = 0; i < normalizedWorkbook.sheets.length; i++) {
+  normalizedWorkbook.sheets.forEach((sheet, i) => {
     files.set(
       `xl/worksheets/sheet${i + 1}.xml`,
-      generateWorksheetXml(normalizedWorkbook.sheets[i], sharedStringsMap),
+      generateWorksheetXml(sheet, sharedStringsMap),
     );
-  }
+  });
 
   return createZip(files);
 }
