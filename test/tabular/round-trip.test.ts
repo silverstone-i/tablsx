@@ -3,6 +3,7 @@ import { describe, it, expect } from "vitest";
 import { sheetFromRows } from "../../src/tabular/serializer.js";
 import { rowsFromSheet } from "../../src/tabular/parser.js";
 import { inferSchema } from "../../src/tabular/schema.js";
+import { CellType } from "../../src/model/types.js";
 import { readXlsx } from "../../src/reader/index.js";
 import { writeXlsx } from "../../src/writer/index.js";
 
@@ -58,7 +59,7 @@ describe("tabular round-trip", () => {
       { id: 1, embedding: [0.1, 0.2, 0.3] },
       { id: 2, embedding: [0.4, 0.5, 0.6] },
     ];
-    const columnOpts = { columns: { embedding: { type: "vector" } } };
+    const columnOpts = { columns: { embedding: { type: CellType.VECTOR } } };
     const sheet = sheetFromRows(input, columnOpts);
     const output = rowsFromSheet(sheet, columnOpts);
     expect(output).toEqual(input);
@@ -91,7 +92,7 @@ describe("tabular round-trip", () => {
       { id: 1, embedding: [0.1, 0.2, 0.3] },
       { id: 2, embedding: [0.4, 0.5, 0.6] },
     ];
-    const columnOpts = { columns: { embedding: { type: "vector" } } };
+    const columnOpts = { columns: { embedding: { type: CellType.VECTOR } } };
     const sheet = sheetFromRows(input, columnOpts);
     const buffer = writeXlsx({ sheets: [sheet] });
     const workbook = readXlsx(buffer);
@@ -120,7 +121,7 @@ describe("tabular round-trip", () => {
       { id: 1, embedding: [0.1, 0.2] },
       { id: 2, embedding: [0.3, 0.4] },
     ];
-    const columnOpts = { columns: { embedding: { type: "vector" } } };
+    const columnOpts = { columns: { embedding: { type: CellType.VECTOR } } };
     const sheet = sheetFromRows(input, columnOpts);
     const buffer = writeXlsx({ sheets: [sheet] });
     const workbook = readXlsx(buffer);

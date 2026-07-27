@@ -172,6 +172,6 @@ describe("rowsFromSheet", () => {
     };
     const rows = rowsFromSheet(sheet);
     expect(rows[0][""]).toBe("x");
-    expect(rows[0]["b"]).toBe("y");
+    expect(rows[0].b).toBe("y");
   });
 });

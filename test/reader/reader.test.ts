@@ -12,7 +12,7 @@ import { createZip } from "../../src/writer/zip.js";
 /**
  * Helper to build a zip from a plain object of path → string pairs.
  */
-function makeZip(obj) {
+function makeZip(obj: Record<string, string>): Uint8Array {
   return createZip(new Map(Object.entries(obj)));
 }
 

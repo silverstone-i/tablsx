@@ -6,7 +6,7 @@ import { CellType } from "../../src/model/types.js";
 /**
  * Helper to wrap cell XML in a minimal worksheet structure.
  */
-function wrapSheet(rowsXml) {
+function wrapSheet(rowsXml: string): string {
   return [
     '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
     '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">',
@@ -96,7 +96,9 @@ describe("parseWorksheet", () => {
 
     expect(rows[0][0].type).toBe(CellType.DATE);
     expect(rows[0][0].value).toBeInstanceOf(Date);
-    expect(rows[0][0].value.toISOString()).toBe("2024-01-01T00:00:00.000Z");
+    expect((rows[0][0].value as Date).toISOString()).toBe(
+      "2024-01-01T00:00:00.000Z",
+    );
   });
 
   it("parses numeric cell when style is not a date style", () => {

@@ -72,7 +72,7 @@ describe.skipIf(!RUN_PERF)("performance", () => {
     expect(midRow[1].value).toBe(`str-${midIdx}-1`);
 
     // Log timing (informational, not a strict gate)
-    /* eslint-disable-next-line no-undef, no-console */
+    /* eslint-disable-next-line no-console */
     console.log(
       `Performance: write=${writeMs.toFixed(0)}ms, read=${readMs.toFixed(0)}ms, size=${(buffer.length / 1024 / 1024).toFixed(1)}MB`,
     );

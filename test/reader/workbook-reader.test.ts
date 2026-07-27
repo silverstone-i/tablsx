@@ -3,10 +3,11 @@ import { describe, it, expect } from "vitest";
 import { WorkbookReader } from "../../src/reader/workbook-reader.js";
 import { SheetReader } from "../../src/reader/sheet-reader.js";
 import { WorkbookBuilder } from "../../src/builder/workbook-builder.js";
+import type { SheetBuilder } from "../../src/builder/sheet-builder.js";
 import { writeXlsx } from "../../src/writer/index.js";
 import { CellType } from "../../src/model/types.js";
 
-function buildBuffer(fn) {
+function buildBuffer(fn: (b: WorkbookBuilder) => void): Uint8Array {
   const builder = WorkbookBuilder.create();
   fn(builder);
   return writeXlsx(builder.build());
@@ -78,7 +79,7 @@ describe("WorkbookReader", () => {
 });
 
 describe("SheetReader", () => {
-  function readerForSheet(fn) {
+  function readerForSheet(fn: (s: SheetBuilder) => void): SheetReader {
     const buf = buildBuffer((b) => fn(b.sheet("Test")));
     return WorkbookReader.fromBuffer(buf).sheet("Test");
   }

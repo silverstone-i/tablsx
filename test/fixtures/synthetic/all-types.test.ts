@@ -85,16 +85,16 @@ describe("synthetic fixture — all types round-trip", () => {
     // Dates
     const dates = result.sheets[3];
     expect(dates.rows[0][0].type).toBe(CellType.DATE);
-    expect(dates.rows[0][0].value.getUTCFullYear()).toBe(2024);
-    expect(dates.rows[0][0].value.getUTCHours()).toBe(10);
-    expect(dates.rows[0][0].value.getUTCMinutes()).toBe(30);
-    expect(dates.rows[0][1].value.toISOString()).toBe(
+    expect((dates.rows[0][0].value as Date).getUTCFullYear()).toBe(2024);
+    expect((dates.rows[0][0].value as Date).getUTCHours()).toBe(10);
+    expect((dates.rows[0][0].value as Date).getUTCMinutes()).toBe(30);
+    expect((dates.rows[0][1].value as Date).toISOString()).toBe(
       "1999-12-31T23:59:59.000Z",
     );
-    expect(dates.rows[1][0].value.toISOString()).toBe(
+    expect((dates.rows[1][0].value as Date).toISOString()).toBe(
       "1900-02-28T00:00:00.000Z",
     );
-    expect(dates.rows[1][1].value.toISOString()).toBe(
+    expect((dates.rows[1][1].value as Date).toISOString()).toBe(
       "1900-03-01T00:00:00.000Z",
     );
 
@@ -112,8 +112,8 @@ describe("synthetic fixture — all types round-trip", () => {
     // Vectors (read back as strings, verify JSON parse)
     const vectors = result.sheets[5];
     expect(vectors.rows[0][0].type).toBe(CellType.STRING);
-    expect(deserializeVector(vectors.rows[0][0].value)).toEqual(vec1);
-    expect(deserializeVector(vectors.rows[0][1].value)).toEqual(vec2);
+    expect(deserializeVector(vectors.rows[0][0].value as string)).toEqual(vec1);
+    expect(deserializeVector(vectors.rows[0][1].value as string)).toEqual(vec2);
 
     // Empty sheet
     expect(result.sheets[6].name).toBe("Empty");

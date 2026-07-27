@@ -143,6 +143,7 @@ describe("generateWorksheetXml", () => {
     const cell = { value: "x", formula: null, type: "unsupported" };
     const sheet = { rows: [[cell]] };
 
+    // @ts-expect-error — testing an invalid cell type
     expect(() => generateWorksheetXml(sheet, new Map())).toThrow(
       "Unsupported cell type",
     );

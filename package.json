@@ -18,7 +18,7 @@
     "test:watch": "vitest",
     "lint": "eslint src/ test/ examples/",
     "lint:fix": "eslint src/ test/ examples/ --fix",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p test/tsconfig.json",
     "build": "tsc -p tsconfig.build.json",
     "check:headers": "grep -rL --include='*.js' --include='*.ts' '// Copyright © 2026 – present NapSoft LLC. All rights reserved.' src test examples | { ! grep .; }",
     "format": "prettier --write '{src,test,examples}/**/*.{js,ts}' 'docs/**/*.md'",

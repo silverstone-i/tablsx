@@ -215,11 +215,11 @@ describe("round-trip", () => {
 
     expect(result.sheets[0].rows[0][0].type).toBe(CellType.DATE);
     expect(result.sheets[0].rows[0][0].value).toBeInstanceOf(Date);
-    expect(result.sheets[0].rows[0][0].value.toISOString()).toBe(
+    expect((result.sheets[0].rows[0][0].value as Date).toISOString()).toBe(
       d1.toISOString(),
     );
     expect(result.sheets[0].rows[0][1].type).toBe(CellType.DATE);
-    expect(result.sheets[0].rows[0][1].value.toISOString()).toBe(
+    expect((result.sheets[0].rows[0][1].value as Date).toISOString()).toBe(
       d2.toISOString(),
     );
   });
@@ -297,7 +297,7 @@ describe("round-trip", () => {
     const result = readXlsx(buffer);
 
     expect(result.sheets[0].rows[0][0].type).toBe(CellType.DATE);
-    const rt = result.sheets[0].rows[0][0].value;
+    const rt = result.sheets[0].rows[0][0].value as Date;
     expect(rt.getUTCFullYear()).toBe(2024);
     expect(rt.getUTCMonth()).toBe(5);
     expect(rt.getUTCDate()).toBe(15);
@@ -319,11 +319,11 @@ describe("round-trip", () => {
     const result = readXlsx(buffer);
 
     expect(result.sheets[0].rows[0][0].type).toBe(CellType.DATE);
-    expect(result.sheets[0].rows[0][0].value.toISOString()).toBe(
+    expect((result.sheets[0].rows[0][0].value as Date).toISOString()).toBe(
       "1900-02-28T00:00:00.000Z",
     );
     expect(result.sheets[0].rows[0][1].type).toBe(CellType.DATE);
-    expect(result.sheets[0].rows[0][1].value.toISOString()).toBe(
+    expect((result.sheets[0].rows[0][1].value as Date).toISOString()).toBe(
       "1900-03-01T00:00:00.000Z",
     );
   });
@@ -338,10 +338,10 @@ describe("round-trip", () => {
     const buffer = writeXlsx(wb);
     const result = readXlsx(buffer);
 
-    expect(result.sheets[0].rows[0][0].value.toISOString()).toBe(
+    expect((result.sheets[0].rows[0][0].value as Date).toISOString()).toBe(
       "1900-01-01T00:00:00.000Z",
     );
-    expect(result.sheets[0].rows[0][1].value.toISOString()).toBe(
+    expect((result.sheets[0].rows[0][1].value as Date).toISOString()).toBe(
       "2099-12-31T00:00:00.000Z",
     );
   });
@@ -373,7 +373,9 @@ describe("round-trip", () => {
     expect(row[2].type).toBe(CellType.BOOLEAN);
     expect(row[2].value).toBe(true);
     expect(row[3].type).toBe(CellType.DATE);
-    expect(row[3].value.toISOString()).toBe("2024-03-15T00:00:00.000Z");
+    expect((row[3].value as Date).toISOString()).toBe(
+      "2024-03-15T00:00:00.000Z",
+    );
     expect(row[4].type).toBe(CellType.FORMULA);
     expect(row[4].formula).toBe("SUM(A1:A10)");
     expect(row[4].value).toBe(100);
@@ -413,7 +415,9 @@ describe("round-trip", () => {
     const result = readXlsx(buffer);
 
     // Vectors round-trip as JSON strings, so parse back to verify precision
-    const parsed = JSON.parse(result.sheets[0].rows[0][0].value);
+    const parsed: unknown = JSON.parse(
+      result.sheets[0].rows[0][0].value as string,
+    );
     expect(parsed).toEqual(vec);
   });
 

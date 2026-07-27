@@ -39,9 +39,10 @@ export class SheetBuilder {
 
   /**
    * Append a single row of raw JavaScript values.
-   * Each value is converted to a cell with automatic type inference.
+   * Each value is converted to a cell with automatic type inference;
+   * `undefined` entries become empty cells.
    */
-  addRow(values: CellValue[]): this {
+  addRow(values: (CellValue | undefined)[]): this {
     this.#rows.push(values.map((v) => createCell(v)));
     return this;
   }
@@ -49,7 +50,7 @@ export class SheetBuilder {
   /**
    * Append multiple rows of raw JavaScript values.
    */
-  addRows(rows: CellValue[][]): this {
+  addRows(rows: (CellValue | undefined)[][]): this {
     for (const row of rows) {
       this.addRow(row);
     }

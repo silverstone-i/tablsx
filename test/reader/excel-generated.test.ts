@@ -4,11 +4,12 @@ import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { readXlsx, CellType } from "../../src/index.js";
+import type { Workbook } from "../../src/index.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const fixtureDir = join(__dirname, "../fixtures/excel-generated");
 
-function readFixture(name) {
+function readFixture(name: string): Workbook {
   const buffer = readFileSync(join(fixtureDir, name));
   return readXlsx(buffer);
 }
@@ -83,22 +84,22 @@ describe("excel-generated compatibility — dates.xlsx", () => {
     wb = readFixture("dates.xlsx");
     const cell = wb.sheets[0].rows[1][1];
     expect(cell.type).toBe(CellType.DATE);
-    expect(cell.value.toISOString()).toBe("2024-06-15T00:00:00.000Z");
+    expect((cell.value as Date).toISOString()).toBe("2024-06-15T00:00:00.000Z");
   });
 
   it("reads date+time values", () => {
     wb = readFixture("dates.xlsx");
     const cell = wb.sheets[0].rows[2][1];
     expect(cell.type).toBe(CellType.DATE);
-    expect(cell.value.getUTCFullYear()).toBe(2024);
-    expect(cell.value.getUTCHours()).toBe(14);
-    expect(cell.value.getUTCMinutes()).toBe(30);
-    expect(cell.value.getUTCSeconds()).toBe(45);
+    expect((cell.value as Date).getUTCFullYear()).toBe(2024);
+    expect((cell.value as Date).getUTCHours()).toBe(14);
+    expect((cell.value as Date).getUTCMinutes()).toBe(30);
+    expect((cell.value as Date).getUTCSeconds()).toBe(45);
   });
 
   it("reads Y2K date", () => {
     wb = readFixture("dates.xlsx");
-    expect(wb.sheets[0].rows[3][1].value.toISOString()).toBe(
+    expect((wb.sheets[0].rows[3][1].value as Date).toISOString()).toBe(
       "2000-01-01T00:00:00.000Z",
     );
   });
@@ -106,25 +107,25 @@ describe("excel-generated compatibility — dates.xlsx", () => {
   it("reads dates near the 1900 leap year bug boundary", () => {
     wb = readFixture("dates.xlsx");
     // Pre-boundary: 1900-02-28
-    expect(wb.sheets[0].rows[5][1].value.toISOString()).toBe(
+    expect((wb.sheets[0].rows[5][1].value as Date).toISOString()).toBe(
       "1900-02-28T00:00:00.000Z",
     );
     // Post-boundary: 1900-03-01
-    expect(wb.sheets[0].rows[6][1].value.toISOString()).toBe(
+    expect((wb.sheets[0].rows[6][1].value as Date).toISOString()).toBe(
       "1900-03-01T00:00:00.000Z",
     );
   });
 
   it("reads Excel epoch date", () => {
     wb = readFixture("dates.xlsx");
-    expect(wb.sheets[0].rows[7][1].value.toISOString()).toBe(
+    expect((wb.sheets[0].rows[7][1].value as Date).toISOString()).toBe(
       "1900-01-01T00:00:00.000Z",
     );
   });
 
   it("reads far future date", () => {
     wb = readFixture("dates.xlsx");
-    expect(wb.sheets[0].rows[8][1].value.toISOString()).toBe(
+    expect((wb.sheets[0].rows[8][1].value as Date).toISOString()).toBe(
       "2099-12-31T00:00:00.000Z",
     );
   });
@@ -246,7 +247,9 @@ describe("excel-generated compatibility — large-dataset.xlsx", () => {
     expect(row[3].value).toBe(true);
     expect(row[3].type).toBe(CellType.BOOLEAN);
     expect(row[4].type).toBe(CellType.DATE);
-    expect(row[4].value.toISOString()).toBe("2020-01-01T00:00:00.000Z");
+    expect((row[4].value as Date).toISOString()).toBe(
+      "2020-01-01T00:00:00.000Z",
+    );
   });
 
   it("reads last data row correctly", () => {

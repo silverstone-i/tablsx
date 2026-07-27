@@ -2,10 +2,18 @@
 import { describe, it, expect } from "vitest";
 import { parseDateStyles } from "../../src/reader/styles-parser.js";
 
+interface StylesFixture {
+  xfs?: number[];
+  numFmts?: { id: number; code: string }[];
+}
+
 /**
  * Helper to build a minimal styles.xml with the given cellXfs and optional custom numFmts.
  */
-function buildStylesXml({ xfs = [], numFmts = [] } = {}) {
+function buildStylesXml({
+  xfs = [],
+  numFmts = [],
+}: StylesFixture = {}): string {
   const parts = [
     '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
     '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">',

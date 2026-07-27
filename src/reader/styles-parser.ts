@@ -28,7 +28,7 @@ function isDateFormat(fmt: string): boolean {
  *
  * @returns Set of cellXfs indices that are date-formatted.
  */
-export function parseDateStyles(xml: string | null): Set<number> {
+export function parseDateStyles(xml: string | null | undefined): Set<number> {
   const dateXfIndices = new Set<number>();
   if (!xml) return dateXfIndices;
 

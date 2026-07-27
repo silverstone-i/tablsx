@@ -26,6 +26,7 @@ describe("serializeVector", () => {
   });
 
   it("throws on non-array input", () => {
+    // @ts-expect-error — testing invalid input
     expect(() => serializeVector("not an array")).toThrow("finite numbers");
   });
 });
@@ -67,7 +68,9 @@ describe("isVectorString", () => {
     expect(isVectorString("hello")).toBe(false);
     expect(isVectorString("42")).toBe(false);
     expect(isVectorString('["a","b"]')).toBe(false);
+    // @ts-expect-error — testing invalid input
     expect(isVectorString(null)).toBe(false);
+    // @ts-expect-error — testing invalid input
     expect(isVectorString(undefined)).toBe(false);
   });
 

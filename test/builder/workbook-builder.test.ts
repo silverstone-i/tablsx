@@ -112,7 +112,9 @@ describe("WorkbookBuilder", () => {
       const wb = readXlsx(buffer);
 
       expect(wb.sheets[0].rows[1][0].type).toBe(CellType.DATE);
-      expect(wb.sheets[0].rows[1][0].value.getTime()).toBe(date.getTime());
+      expect((wb.sheets[0].rows[1][0].value as Date).getTime()).toBe(
+        date.getTime(),
+      );
     });
 
     it("should round-trip multiple sheets", () => {
