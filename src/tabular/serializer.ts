@@ -5,8 +5,18 @@ import {
   normalizeRows,
 } from "../model/workbook.js";
 import { CellType } from "../model/types.js";
+import type { Cell, CellValue, Worksheet } from "../model/types.js";
+import type { ColumnTypeOverrides } from "./parser.js";
 import { isVectorString, deserializeVector } from "../utils/vectors.js";
 import { excelDateToJS } from "../utils/dates.js";
+
+/**
+ * Options for {@link sheetFromRows}.
+ */
+export interface SheetFromRowsOptions {
+  name?: string;
+  columns?: ColumnTypeOverrides;
+}
 
 /**
  * Convert an array of plain objects into a worksheet.
@@ -14,12 +24,11 @@ import { excelDateToJS } from "../utils/dates.js";
  * The union of object keys becomes the header row. Nested objects are encoded
  * as JSON strings. You can override column typing for cases such as vectors or
  * date coercion.
- *
- * @param {Array<Object>} rows Array of row objects.
- * @param {{ name?: string, columns?: Record<string, { type: string }> }} [options]
- * @returns {import("../model/workbook.js").Worksheet}
  */
-export function sheetFromRows(rows, options = {}) {
+export function sheetFromRows(
+  rows: Array<Record<string, unknown>>,
+  options: SheetFromRowsOptions = {},
+): Worksheet {
   const sheetName = options.name ?? "Sheet1";
 
   if (rows.length === 0) {
@@ -27,7 +36,7 @@ export function sheetFromRows(rows, options = {}) {
   }
 
   // Build column union from all rows so keys absent from the first row are not lost
-  const columnSet = new Set();
+  const columnSet = new Set<string>();
   for (const row of rows) {
     for (const key of Object.keys(row)) {
       columnSet.add(key);
@@ -60,7 +69,7 @@ export function sheetFromRows(rows, options = {}) {
         return createCell(JSON.stringify(value));
       }
 
-      return createCell(value);
+      return createCell(value as CellValue);
     }),
   );
 
@@ -70,21 +79,17 @@ export function sheetFromRows(rows, options = {}) {
 
 /**
  * Apply a column type override to a value before writing it into the workbook.
- *
- * @param {*} value
- * @param {string} type
- * @returns {import("../model/workbook.js").Cell}
  */
-function applyOverride(value, type) {
+function applyOverride(value: unknown, type: CellType): Cell {
   switch (type) {
     case CellType.VECTOR: {
       if (Array.isArray(value)) {
-        return createCell(value, null, CellType.VECTOR);
+        return createCell(value as number[], null, CellType.VECTOR);
       }
       if (typeof value === "string" && isVectorString(value)) {
         return createCell(deserializeVector(value), null, CellType.VECTOR);
       }
-      return createCell(value, null, CellType.VECTOR);
+      return createCell(value as CellValue, null, CellType.VECTOR);
     }
     case CellType.DATE: {
       if (value instanceof Date) {
@@ -100,9 +105,9 @@ function applyOverride(value, type) {
       if (typeof value === "number") {
         return createCell(excelDateToJS(value), null, CellType.DATE);
       }
-      return createCell(value, null, CellType.DATE);
+      return createCell(value as CellValue, null, CellType.DATE);
     }
     default:
-      return createCell(value, null, type);
+      return createCell(value as CellValue, null, type);
   }
 }
