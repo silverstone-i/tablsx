@@ -6,8 +6,7 @@
     "rootDir": "src",
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true,
-    "allowJs": false
+    "sourceMap": true
   },
   "include": ["src"],
   "exclude": []

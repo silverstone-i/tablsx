@@ -28,6 +28,12 @@ jobs:
       - name: Run lint
         run: npm run lint
 
+      - name: Run typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
       - name: Publish release candidate
         if: contains(github.ref_name, '-rc.')
         run: npm publish --tag rc
