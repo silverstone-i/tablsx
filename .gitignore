@@ -35,6 +35,7 @@ $RECYCLE.BIN/
 
 # npm packaging
 *.tgz
+dist/
 
 # ESLint cache
 .eslintcache
