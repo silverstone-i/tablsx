@@ -36,6 +36,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: read
 
 concurrency:
   group: release
@@ -73,7 +74,7 @@ jobs:
           last_tag=$(git tag --list 'v[0-9]*' --sort=-v:refname | grep -v -- '-rc\.' | head -1 || true)
           if [ -n "$last_tag" ]; then
             since=$(git log -1 --format=%cI "$last_tag")
-            merged_labels=$(gh pr list --state merged --base main --search "merged:>$since" --json labels --jq '.[].labels[].name' || true)
+            merged_labels=$(gh pr list --state merged --base main --search "merged:>$since" --limit 200 --json labels --jq '.[].labels[].name' || true)
             echo "PRs merged since $last_tag ($since) carry labels: $merged_labels"
           else
             merged_labels=""
