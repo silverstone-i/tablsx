@@ -48,6 +48,6 @@ A husky pre-commit hook runs automatically on every commit:
 - Stage specific files, avoid `git add -A`
 
 ## Branching / PR Strategy
-- All feature and fix branches create PRs targeting **`dev`**
-- PRs from `dev` merge into **`main`** (production)
-- Never create PRs directly from feature branches to `main`
+- All feature and fix branches create PRs targeting **`main`**
+- The legacy `dev` branch is deprecated — do not target or merge it
+- Releases are cut by tagging `main` with `vX.Y.Z` (triggers the npm publish workflow)

@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-07-30
+
 ### Changed
 
 - Migrated the entire codebase (src, tests, examples) to TypeScript with strict compiler settings
