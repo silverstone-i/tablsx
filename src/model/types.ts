@@ -79,7 +79,8 @@ export function isCellType(type: string): type is CellType {
  * `boolean`, `Date` instances become `date`, numeric arrays become `vector`,
  * and nullish values become `empty`.
  *
- * @throws {Error} Thrown when a number is `NaN`, `Infinity`, or `-Infinity`.
+ * @throws {Error} Thrown when a number — scalar or vector element — is `NaN`,
+ *   `Infinity`, or `-Infinity`.
  */
 export function inferType(value: unknown): CellType {
   if (value === null || value === undefined) return CellType.EMPTY;
@@ -94,7 +95,14 @@ export function inferType(value: unknown): CellType {
   }
   if (typeof value === "boolean") return CellType.BOOLEAN;
   if (value instanceof Date) return CellType.DATE;
-  if (Array.isArray(value) && value.every((v) => typeof v === "number"))
+  if (Array.isArray(value) && value.every((v) => typeof v === "number")) {
+    const nonFinite = value.find((v: number) => !Number.isFinite(v));
+    if (nonFinite !== undefined) {
+      throw new Error(
+        `Non-finite number (${nonFinite}) cannot be represented in XLSX`,
+      );
+    }
     return CellType.VECTOR;
+  }
   return CellType.STRING;
 }

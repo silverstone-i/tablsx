@@ -49,6 +49,18 @@ describe("inferType", () => {
     expect(inferType(["a", "b"])).toBe("string");
     expect(inferType([1, "a"])).toBe("string");
   });
+
+  it("throws for non-finite scalar numbers", () => {
+    expect(() => inferType(NaN)).toThrow("Non-finite number");
+    expect(() => inferType(Infinity)).toThrow("Non-finite number");
+    expect(() => inferType(-Infinity)).toThrow("Non-finite number");
+  });
+
+  it("throws for non-finite numbers inside vectors", () => {
+    expect(() => inferType([Infinity])).toThrow("Non-finite number");
+    expect(() => inferType([1, NaN, 3])).toThrow("Non-finite number");
+    expect(() => inferType([0.1, -Infinity])).toThrow("Non-finite number");
+  });
 });
 
 describe("isCellType", () => {
