@@ -1,23 +1,48 @@
 // Copyright © 2026 – present NapSoft LLC. All rights reserved.
+import { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import js from "@eslint/js";
+import tseslint from "typescript-eslint";
+import prettier from "eslint-config-prettier";
 
-export default [
+export default tseslint.config(
+  {
+    ignores: ["node_modules/", "coverage/", "dist/", "docs/.vitepress/"],
+  },
   js.configs.recommended,
+  ...tseslint.configs.recommendedTypeChecked,
+  ...tseslint.configs.stylisticTypeChecked,
   {
     languageOptions: {
-      ecmaVersion: 2022,
-      sourceType: "module",
       globals: {
         TextEncoder: "readonly",
         TextDecoder: "readonly",
       },
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: dirname(fileURLToPath(import.meta.url)),
+      },
     },
     rules: {
-      "no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
       "no-console": "warn",
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_" },
+      ],
+      "@typescript-eslint/explicit-function-return-type": "error",
+      "@typescript-eslint/explicit-module-boundary-types": "error",
+      "@typescript-eslint/consistent-type-imports": "error",
+      "@typescript-eslint/consistent-type-definitions": ["error", "interface"],
     },
   },
   {
-    ignores: ["node_modules/", "coverage/"],
+    files: ["**/*.js", "**/*.mjs"],
+    ...tseslint.configs.disableTypeChecked,
+    rules: {
+      ...tseslint.configs.disableTypeChecked.rules,
+      "@typescript-eslint/explicit-function-return-type": "off",
+      "@typescript-eslint/explicit-module-boundary-types": "off",
+    },
   },
-];
+  prettier,
+);

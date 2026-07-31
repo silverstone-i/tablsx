@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-07-30
+
+### Changed
+
+- Migrated the entire codebase (src, tests, examples) to TypeScript with strict compiler settings
+- The published package now ships compiled JavaScript plus type declarations from `dist/` instead of raw source; the public API is unchanged
+- Public types (`Cell`, `CellValue`, `Worksheet`, `Workbook`, `Schema`, and option interfaces) are now exported from the package entry point
+- ESLint upgraded to a typed `typescript-eslint` configuration with Prettier integration
+- CI now runs typechecking and copyright-header checks; examples run via `tsx`
+
 ## [0.1.2] - 2026-03-13
 
 ### Changed

@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [dev, main]
+    branches: [main]
   pull_request:
-    branches: [dev, main]
+    branches: [main]
 
 jobs:
   test:
@@ -30,6 +30,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run check:headers
 
   examples:
     name: Examples
@@ -41,9 +43,9 @@ jobs:
           node-version: 18
           cache: npm
       - run: npm ci
-      - run: node examples/getting-started.js
-      - run: node examples/builder-workflow.js
-      - run: node examples/tabular-workflow.js
+      - run: npx tsx examples/getting-started.ts
+      - run: npx tsx examples/builder-workflow.ts
+      - run: npx tsx examples/tabular-workflow.ts
 
   docs-build:
     name: Docs Build
