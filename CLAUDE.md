@@ -48,6 +48,9 @@ A husky pre-commit hook runs automatically on every commit:
 - Stage specific files, avoid `git add -A`
 
 ## Branching / PR Strategy
-- All feature and fix branches create PRs targeting **`main`**
+- All feature and fix branches create PRs targeting **`main`** (`main` requires PRs — its ruleset blocks direct pushes, force pushes, and deletion)
+- Pushing a branch has no side effects (safe for syncing between machines). When the work is ready, open the PR deliberately: `gh pr create --base main`
 - The legacy `dev` branch is deprecated — do not target or merge it
-- Releases are cut by tagging `main` with `vX.Y.Z` (triggers the npm publish workflow)
+- Before merging, record changes under `## [Unreleased]` in CHANGELOG.md (the Changelog Check workflow fails release-labeled PRs that skip this), then add exactly one release label to publish on merge: `release:patch`, `release:minor`, or `release:major`
+- On merge of a labeled PR, CI bumps the version, promotes the changelog, tags, and publishes to npm (`release-on-merge.yml`). Unlabeled merges publish nothing — use that for CI/docs-only changes
+- Never cut a release by tagging manually; `publish-rc.yml` (manually pushed `v*-rc.*` tags) is the only manual-tag path and exists for release candidates
